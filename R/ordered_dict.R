@@ -5,28 +5,12 @@
 #' 
 #' @details TODO
 ordered_dict <- function() {
-  root = ordered_dict_link()
+  root = OrderedDictNode$new()
   root$prev = root
   root$next_ = root
   structure(list(root=root,
                  dict=dict()),
             class=c("ordered_dict", "dict"))
-}
-
-ordered_dict_link <- function(prev=NULL, next_=NULL, key=NULL, value=NULL) {
-  link = dict()
-  link$prev = prev; link$next_ = next_; link$key = key; link$value = value
-  link
-}
-
-ordered_dict_links <- function(od) {
-  links = list()
-  link = od$root$next_
-  while (!identical(link, od$root)) {
-    links = c(links, link)
-    link = link$next_
-  }
-  links
 }
 
 `[[.ordered_dict` <- function(od, k) {
@@ -37,7 +21,7 @@ ordered_dict_links <- function(od) {
   if (!has_key(od, k)) {
     root = od$root
     last = root$prev
-    last$next_ = root$prev = od$dict[[k]] = ordered_dict_link(last, root, k, value)
+    last$next_ = root$prev = od$dict[[k]] = OrderedDictNode$new(last, root, k, value)
   }
   od$dict[[k]]$value = value
   od
@@ -59,9 +43,36 @@ has_key.ordered_dict <- function(od, k) {
 }
 
 keys.ordered_dict <- function(od, ...) {
-  sapply(ordered_dict_links(od), function(link) link$key)
+  root = od$root
+  sapply(as.list(root$next_, root$prev), function(link) link$key)
 }
 
 values.ordered_dict <- function(od, ...) {
-  sapply(ordered_dict_links(od), function(link) link$value)
+  root = od$root
+  sapply(as.list(root$next_, root$prev), function(link) link$value)
+}
+
+OrderedDictNode <- R6Class("OrderedDictNode",
+  public = list(
+    prev = NULL,
+    next_ = NULL,
+    key = NULL,
+    value = NULL,
+    initialize = function(prev=NULL, next_=NULL, key=NULL, value=NULL) {
+      self$prev = prev
+      self$next_ = next_
+      self$key = key
+      self$value = value
+    }
+  )
+)
+
+as.list.OrderedDictNode <- function(first, last) {
+  nodes = list()
+  node = first
+  while (!identical(node, last)) {
+    nodes = c(nodes, node)
+    node = node$next_
+  }
+  c(nodes, node)
 }
