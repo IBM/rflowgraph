@@ -3,56 +3,74 @@
 #' @description An ordered dictionary data structure, ala \code{OrderedDict}
 #' in Python or Julia.
 #' 
-#' @details TODO
+#' @details The implementation combines an ordinary dictionary with a circular
+#' doubly linked list, exactly as in Python's \code{OrderedDict}.
 ordered_dict <- function() {
-  root = OrderedDictNode$new()
-  root$prev = root
-  root$next_ = root
-  structure(list(root=root,
-                 dict=dict()),
-            class=c("ordered_dict", "dict"))
+  structure(ordered_dict_impl$new(), class=c("ordered_dict", "dict"))
 }
 
-`[[.ordered_dict` <- function(od, k) {
-  od$dict[[k]]$value
+`[[.ordered_dict` <- function(d, k) d$get(k)$value
+`[[<-.ordered_dict` <- function(d, k, value) {
+  node = if (d$has(k)) d$get(k) else d$add(k)
+  node$value = value
+  d
 }
 
-`[[<-.ordered_dict` <- function(od, k, value) {
-  if (!has_key(od, k)) {
-    root = od$root
-    last = root$prev
-    last$next_ = root$prev = od$dict[[k]] = OrderedDictNode$new(last, root, k, value)
-  }
-  od$dict[[k]]$value = value
-  od
-}
+has_key.ordered_dict <- function(d, k) d$has(k)
+del.ordered_dict <- function(d, k) d$del(k)
+length.ordered_dict <- function(d) d$length()
+keys.ordered_dict <- function(d) sapply(d$as_list(), function(n) n$key)
+values.ordered_dict <- function(d) sapply(d$as_list(), function(n) n$value)
 
-del.ordered_dict <- function(od, k) {
-  link = od$dict[[k]]
-  link$prev$next_ = link$next_
-  link$next_$prev = link$prev
-  del(od$dict, k)
-}
+ordered_dict_impl = R6Class("ordered_dict_impl",
+  private = list(
+    dict = NULL,
+    root = NULL
+  ),
+  public = list(
+    initialize = function() {
+      private$dict = dict()
+      root = ordered_dict_node$new()
+      root$prev = root
+      root$next_ = root
+      private$root = root
+    },
+    length = function() length(private$dict),
+    get = function(key) private$dict[[key]],
+    has = function(key) has_key(private$dict, key),
+    add = function(key) {
+      stopifnot(!self$has(key))
+      root = private$root
+      last = root$prev
+      node = ordered_dict_node$new(last, root, key)
+      last$next_ = root$prev = private$dict[[key]] = node
+    },
+    del = function(key) {
+      stopifnot(self$has(key))
+      node = self$get(key)
+      node$prev$next_ = node$next_
+      node$next_$prev = node$prev
+      node$prev = node$next_ = NULL
+      del(private$dict, key)
+    },
+    next_ = function(node=NULL) {
+      if (is.null(node))
+        node = private$root
+      node = node$next_
+      if (identical(node, private$root)) NULL else node
+    },
+    as_list = function() {
+      n = self$length()
+      nodes = vector(mode="list", length=n)
+      node = NULL
+      for (i in 1:n)
+        nodes[[i]] = node = self$next_(node)
+      nodes
+    }
+  )
+)
 
-length.ordered_dict <- function(od) {
-  length(od$dict)
-}
-
-has_key.ordered_dict <- function(od, k) {
-  has_key(od$dict, k)
-}
-
-keys.ordered_dict <- function(od, ...) {
-  root = od$root
-  sapply(as.list(root$next_, root$prev), function(link) link$key)
-}
-
-values.ordered_dict <- function(od, ...) {
-  root = od$root
-  sapply(as.list(root$next_, root$prev), function(link) link$value)
-}
-
-OrderedDictNode <- R6Class("OrderedDictNode",
+ordered_dict_node <- R6Class("ordered_dict_node",
   public = list(
     prev = NULL,
     next_ = NULL,
@@ -66,13 +84,3 @@ OrderedDictNode <- R6Class("OrderedDictNode",
     }
   )
 )
-
-as.list.OrderedDictNode <- function(first, last) {
-  nodes = list()
-  node = first
-  while (!identical(node, last)) {
-    nodes = c(nodes, node)
-    node = node$next_
-  }
-  c(nodes, node)
-}

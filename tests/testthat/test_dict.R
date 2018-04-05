@@ -4,6 +4,7 @@ test_that("getting, setting, and deleting individual keys on dict", {
   d = dict()
   expect_equal(length(d), 0)
   expect_false(has_key(d, "foo"))
+  expect_equal(d[["foo"]], NULL)
   
   d[["foo"]] = 1
   expect_equal(length(d), 1)
