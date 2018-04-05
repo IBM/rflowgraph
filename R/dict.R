@@ -12,8 +12,8 @@ dict <- function() {
 }
 
 #' @rdname dict
-keys <- function(d) UseMethod("keys")
-keys.dict <- function(d) {
+keys <- function(d, ...) UseMethod("keys")
+keys.dict <- function(d, ...) {
   names(d)
 }
 

@@ -10,7 +10,7 @@
 \usage{
 dict()
 
-keys(d)
+keys(d, ...)
 
 values(d, ...)
 

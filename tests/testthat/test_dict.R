@@ -13,7 +13,7 @@ test_that("getting, setting, and deleting individual keys on dict", {
   d$bar = 2
   expect_equal(length(d), 2)
   expect_true(has_key(d, "bar"))
-  expect_equal(d[["bar"]], 2)
+  expect_equal(d$bar, 2)
   
   del(d, "bar")
   expect_true(has_key(d, "foo"))
