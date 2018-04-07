@@ -23,8 +23,11 @@ test_that("getting, setting, and deleting individual keys on ordered dict", {
   expect_false(has_key(d, "bar"))
 })
 
-test_that("ordered is preserved in ordered dict", {
+test_that("order is preserved in ordered dict", {
   d = ordered_dict()
+  expect_equal(keys(d), list())
+  expect_equal(values(d), list())
+  
   d[["foo"]] = 1
   expect_equal(keys(d), c("foo"))
   expect_equal(values(d), c(1))

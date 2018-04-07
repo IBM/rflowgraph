@@ -66,7 +66,7 @@ ordered_dict_impl = R6Class("ordered_dict_impl",
       n = self$length()
       nodes = vector(mode="list", length=n)
       node = NULL
-      for (i in 1:n)
+      for (i in seq2(1,n))
         nodes[[i]] = node = self$next_(node)
       nodes
     }

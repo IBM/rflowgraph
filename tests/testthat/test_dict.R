@@ -25,10 +25,12 @@ test_that("getting, setting, and deleting individual keys on dict", {
 
 test_that("getting all keys or values of dict", {
   d = dict()
+  expect_equal(keys(d), character())
+  expect_equal(unname(values(d)), list())
+  
   d[["foo"]] = 1
   d[["bar"]] = 2
   d[["baz"]] = 3
-  
   ks = sort(keys(d))
   expect_equal(ks, c("bar","baz","foo"))
   
