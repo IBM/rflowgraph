@@ -5,11 +5,13 @@ test_that("getting, setting, and deleting individual keys on ordered dict", {
   expect_equal(length(d), 0)
   expect_false(has_key(d, "foo"))
   expect_error(d[["foo"]], "key")
+  expect_equal(get_default(d, "foo"), NULL)
   
   d[["foo"]] = 1
   expect_equal(length(d), 1)
   expect_true(has_key(d, "foo"))
   expect_equal(d[["foo"]], 1)
+  expect_equal(get_default(d, "foo"), 1)
   
   d[["bar"]] = 2
   expect_equal(length(d), 2)

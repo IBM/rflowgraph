@@ -41,6 +41,12 @@ del.dict <- function(d, k) {
   remove(list=k, envir=d)
 }
 
+#' @rdname dict
+get_default <- function(d, k, default=NULL) UseMethod("get_default")
+get_default <- function(d, k, default=NULL) {
+  if (has_key(d, k)) d[[k]] else default
+}
+
 print.dict <- function(d, ...) {
   cat("dict with", length(d), "keys")
 }

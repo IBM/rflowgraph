@@ -6,6 +6,7 @@
 \alias{values}
 \alias{has_key}
 \alias{del}
+\alias{get_default}
 \title{Dictionary}
 \usage{
 dict()
@@ -17,6 +18,8 @@ values(d, ...)
 has_key(d, k)
 
 del(d, k)
+
+get_default(d, k, default = NULL)
 }
 \description{
 A dictionary (hash map) data structure.
