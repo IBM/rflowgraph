@@ -1,10 +1,13 @@
 #' Ordered dictionary
 #' 
-#' @description An ordered dictionary data structure, ala \code{OrderedDict}
-#' in Python or Julia.
+#' @description Data structure for ordered dictionaries,
+#' ala \code{OrderedDict} in Python or Julia.
 #' 
-#' @details The implementation combines an ordinary dictionary with a circular
-#' doubly linked list, exactly as in Python's \code{OrderedDict}.
+#' @details The implementation combines an ordinary dictionary (hashmap)
+#' with a circular doubly linked list, exactly as in Python's
+#' \code{OrderedDict}.
+#' 
+#' @seealso \code{\link{dict}}
 ordered_dict <- function() {
   structure(ordered_dict_impl$new(), class=c("ordered_dict", "dict"))
 }

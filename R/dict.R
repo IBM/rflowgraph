@@ -11,6 +11,12 @@ dict <- function() {
             class="dict")
 }
 
+`[[.dict` <- function(d, k) {
+  if (!has_key(d, k))
+    stop(paste("missing key:", k))
+  get(k, envir=d)
+}
+
 #' @rdname dict
 keys <- function(d, ...) UseMethod("keys")
 keys.dict <- function(d, ...) {

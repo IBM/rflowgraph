@@ -7,10 +7,14 @@
 ordered_dict()
 }
 \description{
-An ordered dictionary data structure, ala \code{OrderedDict}
-in Python or Julia.
+Data structure for ordered dictionaries,
+ala \code{OrderedDict} in Python or Julia.
 }
 \details{
-The implementation combines an ordinary dictionary with a circular
-doubly linked list, exactly as in Python's \code{OrderedDict}.
+The implementation combines an ordinary dictionary (hashmap)
+with a circular doubly linked list, exactly as in Python's
+\code{OrderedDict}.
+}
+\seealso{
+\code{\link{dict}}
 }
