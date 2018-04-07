@@ -25,23 +25,23 @@ test_that("getting, setting, and deleting individual keys on ordered dict", {
 
 test_that("order is preserved in ordered dict", {
   d = ordered_dict()
-  expect_equal(keys(d), list())
+  expect_equal(keys(d), character())
   expect_equal(values(d), list())
   
   d[["foo"]] = 1
   expect_equal(keys(d), c("foo"))
-  expect_equal(values(d), c(1))
+  expect_equal(values(d), list(1))
   
   d[["bar"]] = 2
   d[["baz"]] = 3
   expect_equal(keys(d), c("foo", "bar", "baz"))
-  expect_equal(values(d), c(1, 2, 3))
+  expect_equal(values(d), list(1, 2, 3))
   
   del(d, "foo")
   expect_equal(keys(d), c("bar", "baz"))
-  expect_equal(values(d), c(2, 3))
+  expect_equal(values(d), list(2, 3))
   d[["bar"]] = 0
   d[["foo"]] = 4
   expect_equal(keys(d), c("bar", "baz", "foo"))
-  expect_equal(values(d), c(0, 3, 4))
+  expect_equal(values(d), list(0, 3, 4))
 })

@@ -36,5 +36,5 @@ test_that("getting all keys or values of dict", {
   
   vs = values(d)[ks]
   expect_equal(length(vs), 3)
-  expect_equal(vs[ks], c(bar=2, baz=3, foo=1))
+  expect_equal(vs[ks], list(bar=2, baz=3, foo=1))
 })

@@ -22,8 +22,8 @@ ordered_dict <- function() {
 has_key.ordered_dict <- function(d, k) d$has(k)
 del.ordered_dict <- function(d, k) d$del(k)
 length.ordered_dict <- function(d) d$length()
-keys.ordered_dict <- function(d) sapply(d$as_list(), function(n) n$key)
-values.ordered_dict <- function(d) sapply(d$as_list(), function(n) n$value)
+keys.ordered_dict <- function(d) as.character(lapply(d$as_list(), function(n) n$key))
+values.ordered_dict <- function(d) lapply(d$as_list(), function(n) n$value)
 
 ordered_dict_impl = R6Class("ordered_dict_impl",
   private = list(

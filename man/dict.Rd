@@ -11,9 +11,9 @@
 \usage{
 dict()
 
-keys(d, ...)
+keys(d)
 
-values(d, ...)
+values(d)
 
 has_key(d, k)
 

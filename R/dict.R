@@ -18,15 +18,18 @@ dict <- function() {
 }
 
 #' @rdname dict
-keys <- function(d, ...) UseMethod("keys")
-keys.dict <- function(d, ...) {
+keys <- function(d) UseMethod("keys")
+keys.dict <- function(d) {
   names(d)
 }
 
 #' @rdname dict
-values <- function(d, ...) UseMethod("values")
-values.dict <- function(d, ...) {
-  sapply(keys(d), function(k) d[[k]], ...)
+values <- function(d) UseMethod("values")
+values.dict <- function(d) {
+  ks = keys(d)
+  vs = lapply(ks, function(k) d[[k]])
+  names(vs) <- ks
+  vs
 }
 
 #' @rdname dict
