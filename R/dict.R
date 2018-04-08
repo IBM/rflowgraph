@@ -3,9 +3,13 @@
 #' @description A dictionary (hash map) data structure.
 #' The keys must be strings and the values can be any R object.
 #' 
-#' @details This data type is a thin wrapper around a standard R environment.
+#' @details The \code{dict} data type is a thin wrapper around an R environment.
+#' Unlike most R types, it is mutable and has pass-by-reference semantics.
 #' It exists because of the packages currently on CRAN, \code{hashmap} does
-#' not allow arbitrary value types and \code{hash} is GPL-ed.
+#' not allow arbitrary value types and \code{hash} has a GPL license.
+#' 
+#' The \code{dict} interface is also implemented for lists, which can serve as
+#' immutable dictionaries (with linear time lookup).
 dict <- function(...) {
   structure(list2env(list(...), hash=TRUE, parent=emptyenv()),
             class="dict")

@@ -3,7 +3,8 @@
 #' @description Data structure for ordered dictionaries,
 #' ala \code{OrderedDict} in Python or Julia.
 #' 
-#' @details The implementation combines an ordinary dictionary (hashmap)
+#' @details Like ordinary dictionaries (\code{dict}) and unlike most R objects,
+#' ordered dictionaries are mutable. The implementation combines a dictionary
 #' with a circular doubly linked list, exactly as in Python's
 #' \code{OrderedDict}.
 #' 
