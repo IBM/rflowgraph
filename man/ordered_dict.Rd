@@ -4,7 +4,7 @@
 \alias{ordered_dict}
 \title{Ordered dictionary}
 \usage{
-ordered_dict()
+ordered_dict(...)
 }
 \description{
 Data structure for ordered dictionaries,
