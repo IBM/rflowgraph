@@ -49,6 +49,8 @@ has_node.multigraph <- function(g, n) has_key(g$nodes, n)
 has_edge.multigraph <- function(g, src, tgt) has_key(g$succ[[src]], tgt)
 
 add_node.multigraph <- function(g, n, data=dict()) {
+  if (has_key(g$nodes, n))
+    stop(paste("node already exists:", n))
   g$nodes[[n]] = data
   g$succ[[n]] = ordered_dict()
   g$pred[[n]] = ordered_dict()

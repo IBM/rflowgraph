@@ -3,9 +3,36 @@
 #' @import xml2
 #' @export
 read_graphml <- function(xml) {
-  if (!class(xml) == "xml_document")
+  # Read XML document and top-level elements.
+  if (!("xml_document" %in% class(xml)))
     xml = read_xml(xml)
-  stopifnot(xml_name(xml) == "graphml")
+  if (xml_name(xml) != "graphml")
+    stop("Root element of GraphML document must be <graphml>")
+  xgraphs = xml_find_all(xml, "graph")
+  if (length(xgraphs) != 1)
+    stop("Root element of GraphML document must contain exactly one <graph>")
+  xgraph = xgraphs[[1]]
+  
+  # Read nodes.
+  graph = multigraph()
+  for (xnode in xml_find_all(xgraph, "node")) {
+    node = xml_required_attr(xnode, "id")
+    add_node(graph, node, read_graphml_data(xnode))
+  }
+  
+  # Read edges.
+  for (xedge in xml_find_all(xgraph, "edge")) {
+    src = xml_required_attr(xedge, "source")
+    tgt = xml_required_attr(xedge, "target")
+    add_edge(graph, src, tgt, read_graphml_data(xedge))
+  }
+  
+  graph
+}
+
+read_graphml_data <- function(xnode) {
+  # TODO
+  dict()
 }
 
 #' Write graph to GraphML
@@ -32,7 +59,6 @@ write_graphml <- function(graph, file=NULL) {
   
   # Create edge elements.
   for (edge in edges(graph)) {
-    print(edge)
     c(src, tgt, ind) %<-% unclass(edge)
     xedge = xml_add_child(xgraph, "edge", source=src, target=tgt)
     write_graphml_data(xedge, "edge", edge_data(graph, src, tgt, ind))
@@ -47,4 +73,9 @@ write_graphml <- function(graph, file=NULL) {
 
 write_graphml_data <- function(xgraph, scope, data) {
   # TODO
+}
+
+xml_required_attr <- function(x, attr) {
+  stopifnot(xml_has_attr(x, attr))
+  xml_attr(x, attr)
 }
