@@ -48,20 +48,28 @@ write_graphml <- function(graph, file=NULL) {
   )
   
   # Create top-level graph element.
+  graphml_keys = ordered_dict()
   xgraph = xml_add_child(xml, "graph", edgedefault="directed")
-  write_graphml_data(xgraph, "graph", graph_data(graph, node))
+  write_graphml_data(graphml_keys, xgraph, graph_data(graph))
   
   # Create node elements.
   for (node in nodes(graph)) {
     xnode = xml_add_child(xgraph, "node", id=node)
-    write_graphml_data(xnode, "node", node_data(graph, node))
+    write_graphml_data(graphml_keys, xnode, node_data(graph, node))
   }
   
   # Create edge elements.
   for (edge in edges(graph)) {
     c(src, tgt, ind) %<-% unclass(edge)
     xedge = xml_add_child(xgraph, "edge", source=src, target=tgt)
-    write_graphml_data(xedge, "edge", edge_data(graph, src, tgt, ind))
+    write_graphml_data(graphml_keys, xedge, edge_data(graph, src, tgt, ind))
+  }
+  
+  # Write key elements, based on attribute keys (data declarations) collected
+  # while writing graph, node, and edge data.
+  for (key in values(graphml_keys)) {
+    xkey = xml_add_sibling(xgraph, "key", .where="before")
+    xml_attrs(xkey) = key
   }
 
   # Write XML to file or return XML document.
@@ -71,8 +79,41 @@ write_graphml <- function(graph, file=NULL) {
     xml
 }
 
-write_graphml_data <- function(xgraph, scope, data) {
-  # TODO
+write_graphml_data <- function(graphml_keys, xelem, data) {
+  if (is.null(data)) return()
+  scope = xml_name(xelem)
+  for (attr_name in keys(data)) {
+    attr_value = data[[attr_name]]
+    
+    # Get or create GraphML key for the data attribute.
+    graphml_key = set_default(graphml_keys, paste(attr_name, scope, sep=":"), {
+      id = paste0("d", length(graphml_keys) + 1)
+      attr_type = write_graphml_data_type(typeof(attr_value))
+      list(id=id, `for`=scope, attr.name=attr_name, attr.type=attr_type)
+    })
+    
+    # Write data attribute to <data> element.
+    xdata = xml_add_child(xelem, "data", key=graphml_key$id)
+    xml_text(xdata) <- write_graphml_data_value(attr_value)
+  }
+}
+
+write_graphml_data_type <- function(type) {
+  if (type == "logical") "boolean"
+  else if (type == "integer") "int"
+  else if (type == "double") "double"
+  else if (type == "character") "string"
+  else stop(paste("No GraphML data type for R type:", type))
+}
+
+write_graphml_data_value <- function(x) {
+  type = typeof(x)
+  if (type == "logical")
+    tolower(toString(x))
+  else if (type == "integer" || type == "double" || type == "character")
+    toString(x)
+  else
+    stop(paste("No GraphML data type for R type:", type))
 }
 
 xml_required_attr <- function(x, attr) {

@@ -123,3 +123,7 @@ edge_attr.default <- function(g, src, tgt, key) edge_data(g, src, tgt)[[key]]
   data[[key]] = value
   g
 }
+
+print.graph <- function(g, ...) {
+  cat(class(g)[[1]], "with", nnodes(g), "nodes and", nedges(g), "edges")
+}

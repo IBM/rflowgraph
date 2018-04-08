@@ -43,6 +43,13 @@ get_default.default <- function(d, k, default=NULL) {
   if (has_key(d, k)) d[[k]] else default
 }
 
+#' @rdname dict
+set_default <- function(d, k, default=NULL) UseMethod("set_default")
+set_default.default <- function(d, k, default=NULL) {
+  if (has_key(d, k)) d[[k]] else d[[k]] <- default
+}
+set_default.list <- function(d, k, default=NULL) stop("lists are immutable")
+
 print.dict <- function(d, ...) {
   cat(class(d)[[1]], "with", length(d), "keys")
 }
