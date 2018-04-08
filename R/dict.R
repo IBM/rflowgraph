@@ -26,10 +26,7 @@ keys.dict <- function(d) {
 #' @rdname dict
 values <- function(d) UseMethod("values")
 values.dict <- function(d) {
-  ks = keys(d)
-  vs = lapply(ks, function(k) d[[k]])
-  names(vs) <- ks
-  vs
+  lapply(names(d), function(k) d[[k]])
 }
 
 #' @rdname dict
