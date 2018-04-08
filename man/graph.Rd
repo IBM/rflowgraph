@@ -13,6 +13,9 @@
 \alias{add_edge}
 \alias{has_edge}
 \alias{rem_edge}
+\alias{neighbors}
+\alias{successors}
+\alias{predecessors}
 \title{Graphs}
 \usage{
 graph(...)
@@ -38,6 +41,12 @@ add_edge(g, src, tgt, ...)
 has_edge(g, src, tgt)
 
 rem_edge(g, src, tgt, ...)
+
+neighbors(g, node)
+
+successors(g, node)
+
+predecessors(g, node)
 }
 \description{
 Generic interface for graphs as S3 objects

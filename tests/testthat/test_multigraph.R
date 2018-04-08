@@ -4,9 +4,11 @@ test_that("adding and removing nodes in a multigraph", {
   g = multigraph()
   expect_equal(nodes(g), character())
   expect_equal(nnodes(g), 0)
+  expect_false(has_node(g, "u"))
   
   add_node(g, "u")
   expect_equal(nodes(g), c("u"))
+  expect_true(has_node(g, "u"))
   
   add_node(g, "v")
   expect_equal(nodes(g), c("u","v"))
@@ -23,6 +25,7 @@ test_that("adding and removing edges in a multigraph", {
   expect_equal(edges(g,"u","v"), list())
   expect_equal(nedges(g), 0)
   expect_equal(nedges(g,"u","v"), 0)
+  expect_false(has_edge(g,"u","v"))
   
   add_edge(g, "u", "v")
   add_edge(g, "v", "w")
@@ -30,6 +33,7 @@ test_that("adding and removing edges in a multigraph", {
   expect_equal(edges(g,"u","v"), list(multiedge("u","v",1)))
   expect_equal(nedges(g), 2)
   expect_equal(nedges(g,"u","v"), 1)
+  expect_true(has_edge(g,"u","v"))
   
   add_edge(g, "u", "v")
   expect_equal(nedges(g), 3)
@@ -43,4 +47,17 @@ test_that("adding and removing edges in a multigraph", {
   rem_node(g, "u")
   expect_equal(nodes(g), c("v","w"))
   expect_equal(edges(g), list(multiedge("v","w",1)))
+})
+
+test_that("successors and predecessors in multigraph", {
+  g = multigraph()
+  add_nodes(g, c("u","v","w"))
+  add_edge(g, "u", "v")
+  add_edge(g, "u", "w")
+  add_edge(g, "v", "w")
+  expect_equal(neighbors(g,"u"), c("v","w"))
+  expect_equal(successors(g,"u"), c("v","w"))
+  expect_equal(predecessors(g,"u"), character())
+  expect_equal(successors(g,"v"), "w")
+  expect_equal(predecessors(g,"v"), "u")
 })

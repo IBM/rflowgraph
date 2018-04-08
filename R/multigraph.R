@@ -90,6 +90,9 @@ rem_edge.multigraph <- function(g, src, tgt, ind) {
   }
   ind
 }
+
+successors.multigraph <- function(g, node) keys(g$succ[[node]])
+predecessors.multigraph <- function(g, node) keys(g$pred[[node]])
   
 graph_data.multigraph <- function(g) g$data
 node_data.multigraph <- function(g, n) g$nodes[[n]]

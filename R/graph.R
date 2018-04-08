@@ -52,6 +52,20 @@ has_edge <- function(g, src, tgt) UseMethod("has_edge")
 #' @export
 rem_edge <- function(g, src, tgt, ...) UseMethod("rem_edge")
 
+#' @rdname graph
+neighbors <- function(g, node) UseMethod("neighbors")
+neighbors.default <- function(g, node) successors(g, node)
+
+#' @rdname graph
+#' @export
+successors <- function(g, node) UseMethod("successors")
+successors.default <- function(g, node) neighbors(g, node)
+
+#' @rdname graph
+#' @export
+predecessors <- function(g, node) UseMethod("predecessors")
+predecessors.default <- function(g, node) neighbors(g, node)
+
 #' Graph data
 #' 
 #' @description Arbitrary metadata can be attached to graphs, nodes, and edges.
