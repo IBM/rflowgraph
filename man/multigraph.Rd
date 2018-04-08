@@ -5,14 +5,15 @@
 \alias{multiedge}
 \title{Multigraphs}
 \usage{
-multigraph(data = dict())
+multigraph(data = list())
 
 multiedge(src, tgt, ind)
 }
 \description{
 A directed, attributed multigraph.
-The internal data structure uses adjacency lists for successors and predecessors.
 }
 \details{
-TODO
+The internal data structure uses adjacency lists for successors
+and predecessors. It is modeled on the \code{MultiDiGraph} class in the
+Python library NetworkX.
 }

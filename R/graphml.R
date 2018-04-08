@@ -32,7 +32,7 @@ read_graphml <- function(xml) {
 
 read_graphml_data <- function(xnode) {
   # TODO
-  dict()
+  list()
 }
 
 #' Write graph to GraphML

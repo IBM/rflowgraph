@@ -2,6 +2,9 @@
 #' 
 #' @description Generic interface for graphs as S3 objects
 #' (directed or undirected, simple or multi-edged).
+#' 
+#' @details Unlike most R objects, graphs are mutable and have
+#' pass-by-reference semantics.
 graph <- function(...) stop("Abstract interface for graphs")
 
 #' @rdname graph
@@ -69,10 +72,14 @@ predecessors.default <- function(g, node) neighbors(g, node)
 #' Graph data
 #' 
 #' @description Arbitrary metadata can be attached to graphs, nodes, and edges.
-#' By default, the data is a dictionary of attributes (key-value pairs).
+#' By default, the data is a named list of attributes (key-value pairs).
 #' 
 #' @export
 graph_data <- function(g) UseMethod("graph_data")
+
+#' @rdname graph_data
+#' @export
+`graph_data<-` <- function(g, value) UseMethod("graph_data<-")
 
 #' @rdname graph_data
 #' @export
@@ -83,14 +90,17 @@ graph_attr.default <- function(g, key) graph_data(g)[[key]]
 #' @export
 `graph_attr<-` <- function(g, key, value) UseMethod("graph_attr<-")
 `graph_attr<-.default` <- function(g, key, value) {
-  data = graph_data(g)
-  data[[key]] = value
+  graph_data(g)[[key]] <- value
   g
 }
 
 #' @rdname graph_data
 #' @export
 node_data <- function(g, node) UseMethod("node_data")
+
+#' @rdname graph_data
+#' @export
+`node_data<-` <- function(g, node, value) UseMethod("node_data<-")
 
 #' @rdname graph_data
 #' @export
@@ -101,14 +111,17 @@ node_attr.default <- function(g, node, key) node_data(g, node)[[key]]
 #' @export
 `node_attr<-` <- function(g, node, key, value) UseMethod("node_attr<-")
 `node_attr<-.default` <- function(g, node, key, value) {
-  data = node_data(g, node)
-  data[[key]] = value
+  node_data(g, node)[[key]] <- value
   g
 }
 
 #' @rdname graph_data
 #' @export
 edge_data <- function(g, src, tgt, ...) UseMethod("edge_data")
+
+#' @rdname graph_data
+#' @export
+`edge_data<-` <- function(g, src, tgt, ..., value) UseMethod("edge_data<-")
 
 #' @rdname graph_data
 #' @export
@@ -119,8 +132,7 @@ edge_attr.default <- function(g, src, tgt, key) edge_data(g, src, tgt)[[key]]
 #' @export
 `edge_attr<-` <- function(g, src, tgt, ..., key, value) UseMethod("edge_attr<-")
 `edge_attr<-.default` <- function (g, src, tgt, key, value) {
-  data = edge_data(g, src, tgt)
-  data[[key]] = value
+  edge_data(g, src, tgt)[[key]] <- value
   g
 }
 

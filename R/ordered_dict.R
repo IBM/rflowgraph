@@ -11,7 +11,7 @@
 #' @seealso \code{\link{dict}}
 ordered_dict <- function(...) {
   data = list(...)
-  d = structure(ordered_dict_impl$new(), class=c("ordered_dict", "dict"))
+  d = ordered_dict_class$new()
   for (i in seq_along(data))
     d[[names(data)[[i]]]] = data[[i]]
   d
@@ -30,7 +30,8 @@ length.ordered_dict <- function(d) d$length()
 keys.ordered_dict <- function(d) as.character(lapply(d$as_list(), function(n) n$key))
 values.ordered_dict <- function(d) lapply(d$as_list(), function(n) n$value)
 
-ordered_dict_impl <- R6Class("ordered_dict_impl",
+ordered_dict_class <- R6Class(
+  classname = c("ordered_dict", "dict"),
   private = list(
     dict = NULL,
     root = NULL

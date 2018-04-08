@@ -52,3 +52,7 @@ predecessors(g, node)
 Generic interface for graphs as S3 objects
 (directed or undirected, simple or multi-edged).
 }
+\details{
+Unlike most R objects, graphs are mutable and have
+pass-by-reference semantics.
+}

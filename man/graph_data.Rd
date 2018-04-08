@@ -2,17 +2,22 @@
 % Please edit documentation in R/graph.R
 \name{graph_data}
 \alias{graph_data}
+\alias{graph_data<-}
 \alias{graph_attr}
 \alias{graph_attr<-}
 \alias{node_data}
+\alias{node_data<-}
 \alias{node_attr}
 \alias{node_attr<-}
 \alias{edge_data}
+\alias{edge_data<-}
 \alias{edge_attr}
 \alias{edge_attr<-}
 \title{Graph data}
 \usage{
 graph_data(g)
+
+graph_data(g) <- value
 
 graph_attr(g, key)
 
@@ -20,11 +25,15 @@ graph_attr(g, key) <- value
 
 node_data(g, node)
 
+node_data(g, node) <- value
+
 node_attr(g, node, key)
 
 node_attr(g, node, key) <- value
 
 edge_data(g, src, tgt, ...)
+
+edge_data(g, src, tgt, ...) <- value
 
 edge_attr(g, src, tgt, ..., key)
 
@@ -32,5 +41,5 @@ edge_attr(g, src, tgt, ..., key) <- value
 }
 \description{
 Arbitrary metadata can be attached to graphs, nodes, and edges.
-By default, the data is a dictionary of attributes (key-value pairs).
+By default, the data is a named list of attributes (key-value pairs).
 }
