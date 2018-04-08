@@ -19,34 +19,30 @@ dict <- function(...) {
 
 #' @rdname dict
 keys <- function(d) UseMethod("keys")
-keys.dict <- function(d) {
-  names(d)
-}
+keys.dict <- function(d) names(d)
+keys.list <- function(l) names(l)
 
 #' @rdname dict
 values <- function(d) UseMethod("values")
-values.dict <- function(d) {
-  lapply(names(d), function(k) d[[k]])
-}
+values.dict <- function(d) lapply(names(d), function(k) d[[k]])
+values.list <- function(l) unname(l)
 
 #' @rdname dict
 has_key <- function(d, k) UseMethod("has_key")
-has_key.dict <- function(d, k) {
-  exists(k, envir=d)
-}
+has_key.dict <- function(d, k) exists(k, envir=d)
+has_key.list <- function(l, k) k %in% names(l)
 
 #' @rdname dict
 del <- function(d, k) UseMethod("del")
-del.dict <- function(d, k) {
-  remove(list=k, envir=d)
-}
+del.dict <- function(d, k) remove(list=k, envir=d)
+del.list <- function(l, k) stop("lists are immutable")
 
 #' @rdname dict
 get_default <- function(d, k, default=NULL) UseMethod("get_default")
-get_default <- function(d, k, default=NULL) {
+get_default.default <- function(d, k, default=NULL) {
   if (has_key(d, k)) d[[k]] else default
 }
 
 print.dict <- function(d, ...) {
-  cat("dict with", length(d), "keys")
+  cat(class(d)[[1]], "with", length(d), "keys")
 }
