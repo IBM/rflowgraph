@@ -63,14 +63,16 @@ test_that("get successors and predecessors in a multigraph", {
 })
 
 test_that("get and set graph, node, and edge attributes in a multigraph", {
-  g = multigraph()
-  expect_error(graph_attr(g, "foo"))
-  graph_attr(g, "foo") <- TRUE
+  g = multigraph(data=dict(foo=TRUE))
+  expect_equal(graph_attr(g, "foo"), TRUE)
+  expect_error(graph_attr(g, "bar"))
   graph_attr(g, "bar") <- FALSE
   expect_equal(graph_attr(g, "foo"), TRUE)
   expect_equal(graph_attr(g, "bar"), FALSE)
   
-  add_nodes(g, c("u","v"))
+  add_node(g, "u", data=dict(foo=TRUE))
+  add_node(g, "v")
+  expect_equal(node_attr(g, "u", "foo"), TRUE)
   expect_error(node_attr(g, "v", "foo"))
   node_attr(g, "v", "foo") <- TRUE
   node_attr(g, "v", "bar") <- FALSE
@@ -78,10 +80,11 @@ test_that("get and set graph, node, and edge attributes in a multigraph", {
   expect_equal(node_attr(g, "v", "bar"), FALSE)
   
   add_edge(g, "u", "v")
-  add_edge(g, "u", "v")
+  add_edge(g, "u", "v", data=dict(baz=NULL))
   edge_attr(g, "u", "v", 1, "foo") <- TRUE
   edge_attr(g, "u", "v", 1, "bar") <- FALSE
   expect_equal(edge_attr(g, "u", "v", 1, "foo"), TRUE)
   expect_equal(edge_attr(g, "u", "v", 1, "bar"), FALSE)
-  expect_error(edge_attr(g, "u", "v", 2, "foo"))
+  expect_error(edge_attr(g, "u", "v", 2, "bar"))
+  expect_equal(edge_attr(g, "u", "v", 2, "baz"), NULL)
 })

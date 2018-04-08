@@ -44,4 +44,8 @@ test_that("order is preserved in ordered dict", {
   d[["foo"]] = 4
   expect_equal(keys(d), c("bar", "baz", "foo"))
   expect_equal(values(d), list(0, 3, 4))
+  
+  d = ordered_dict(foo=1, bar=2, baz=3)
+  expect_equal(keys(d), c("foo", "bar", "baz"))
+  expect_equal(values(d), list(1, 2, 3))
 })

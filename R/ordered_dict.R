@@ -8,8 +8,12 @@
 #' \code{OrderedDict}.
 #' 
 #' @seealso \code{\link{dict}}
-ordered_dict <- function() {
-  structure(ordered_dict_impl$new(), class=c("ordered_dict", "dict"))
+ordered_dict <- function(...) {
+  data = list(...)
+  d = structure(ordered_dict_impl$new(), class=c("ordered_dict", "dict"))
+  for (i in seq_along(data))
+    d[[names(data)[[i]]]] = data[[i]]
+  d
 }
 
 `[[.ordered_dict` <- function(d, k) d$get(k)$value

@@ -6,8 +6,8 @@
 #' @details This data type is a thin wrapper around a standard R environment.
 #' It exists because of the packages currently on CRAN, \code{hashmap} does
 #' not allow arbitrary value types and \code{hash} is GPL-ed.
-dict <- function() {
-  structure(new.env(hash=TRUE, parent=emptyenv()),
+dict <- function(...) {
+  structure(list2env(list(...), hash=TRUE, parent=emptyenv()),
             class="dict")
 }
 

@@ -9,7 +9,7 @@
 \alias{get_default}
 \title{Dictionary}
 \usage{
-dict()
+dict(...)
 
 keys(d)
 
