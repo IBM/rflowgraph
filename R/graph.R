@@ -82,7 +82,11 @@ graph_attr.default <- function(g, key) graph_data(g)[[key]]
 #' @rdname graph_data
 #' @export
 `graph_attr<-` <- function(g, key, value) UseMethod("graph_attr<-")
-`graph_attr<-.default` <- function(g, key, value) graph_data(g)[[key]] = value
+`graph_attr<-.default` <- function(g, key, value) {
+  data = graph_data(g)
+  data[[key]] = value
+  g
+}
 
 #' @rdname graph_data
 #' @export
@@ -90,14 +94,17 @@ node_data <- function(g, node) UseMethod("node_data")
 
 #' @rdname graph_data
 #' @export
-node_attr <- function(g, node, key) UseMethod("edge_attr")
+node_attr <- function(g, node, key) UseMethod("node_attr")
 node_attr.default <- function(g, node, key) node_data(g, node)[[key]]
 
 #' @rdname graph_data
 #' @export
 `node_attr<-` <- function(g, node, key, value) UseMethod("node_attr<-")
-`node_attr<-.default` <- function(g, node, key, value)
-  node_data(g, node)[[key]] = value
+`node_attr<-.default` <- function(g, node, key, value) {
+  data = node_data(g, node)
+  data[[key]] = value
+  g
+}
 
 #' @rdname graph_data
 #' @export
@@ -111,5 +118,8 @@ edge_attr.default <- function(g, src, tgt, key) edge_data(g, src, tgt)[[key]]
 #' @rdname graph_data
 #' @export
 `edge_attr<-` <- function(g, src, tgt, ..., key, value) UseMethod("edge_attr<-")
-`edge_attr<-.default` <- function (g, src, tgt, key, value)
-  edge_data(g, src, tgt)[[key]] = value
+`edge_attr<-.default` <- function (g, src, tgt, key, value) {
+  data = edge_data(g, src, tgt)
+  data[[key]] = value
+  g
+}

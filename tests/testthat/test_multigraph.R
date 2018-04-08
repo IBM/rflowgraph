@@ -1,6 +1,6 @@
 context("multigraph")
 
-test_that("adding and removing nodes in a multigraph", {
+test_that("add and remove nodes in a multigraph", {
   g = multigraph()
   expect_equal(nodes(g), character())
   expect_equal(nnodes(g), 0)
@@ -18,7 +18,7 @@ test_that("adding and removing nodes in a multigraph", {
   expect_equal(nodes(g), c("v"))
 })
 
-test_that("adding and removing edges in a multigraph", {
+test_that("add and remove edges in a multigraph", {
   g = multigraph()
   add_nodes(g, c("u","v","w"))
   expect_equal(edges(g), list())
@@ -49,7 +49,7 @@ test_that("adding and removing edges in a multigraph", {
   expect_equal(edges(g), list(multiedge("v","w",1)))
 })
 
-test_that("successors and predecessors in multigraph", {
+test_that("get successors and predecessors in a multigraph", {
   g = multigraph()
   add_nodes(g, c("u","v","w"))
   add_edge(g, "u", "v")
@@ -60,4 +60,28 @@ test_that("successors and predecessors in multigraph", {
   expect_equal(predecessors(g,"u"), character())
   expect_equal(successors(g,"v"), "w")
   expect_equal(predecessors(g,"v"), "u")
+})
+
+test_that("get and set graph, node, and edge attributes in a multigraph", {
+  g = multigraph()
+  expect_error(graph_attr(g, "foo"))
+  graph_attr(g, "foo") <- TRUE
+  graph_attr(g, "bar") <- FALSE
+  expect_equal(graph_attr(g, "foo"), TRUE)
+  expect_equal(graph_attr(g, "bar"), FALSE)
+  
+  add_nodes(g, c("u","v"))
+  expect_error(node_attr(g, "v", "foo"))
+  node_attr(g, "v", "foo") <- TRUE
+  node_attr(g, "v", "bar") <- FALSE
+  expect_equal(node_attr(g, "v", "foo"), TRUE)
+  expect_equal(node_attr(g, "v", "bar"), FALSE)
+  
+  add_edge(g, "u", "v")
+  add_edge(g, "u", "v")
+  edge_attr(g, "u", "v", 1, "foo") <- TRUE
+  edge_attr(g, "u", "v", 1, "bar") <- FALSE
+  expect_equal(edge_attr(g, "u", "v", 1, "foo"), TRUE)
+  expect_equal(edge_attr(g, "u", "v", 1, "bar"), FALSE)
+  expect_error(edge_attr(g, "u", "v", 2, "foo"))
 })

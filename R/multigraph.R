@@ -97,4 +97,12 @@ predecessors.multigraph <- function(g, node) keys(g$pred[[node]])
 graph_data.multigraph <- function(g) g$data
 node_data.multigraph <- function(g, n) g$nodes[[n]]
 edge_data.multigraph <- function(g, src, tgt, ind) g$succ[[src]][[tgt]][[ind]]
-edge_data.multigraph <- function(g, e) edge_data(g, e$src, e$tgt, e$ind)
+
+edge_attr.multigraph <- function(g, src, tgt, ind, key) {
+  edge_data(g, src, tgt, ind)[[key]]
+}
+`edge_attr<-.multigraph` <- function(g, src, tgt, ind, key, value) {
+  data = edge_data(g, src, tgt, ind)
+  data[[key]] = value
+  g
+}
