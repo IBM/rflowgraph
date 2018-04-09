@@ -13,26 +13,53 @@ read_graphml <- function(xml) {
     stop("Root element of GraphML document must contain exactly one <graph>")
   xgraph = xgraphs[[1]]
   
+  # Read keys (data attribute declarations).
+  graphml_keys = dict()
+  for (xkey in xml_find_all(xml, "key")) {
+    id = xml_required_attr(xkey, "id")
+    scope = xml_attr(xkey, "for", default="all")
+    attr_name = xml_required_attr(xkey, "attr.name")
+    attr_type = xml_attr(xkey, "attr.type", default="string")
+    graphml_keys[[id]] = list(attr_name=attr_name, attr_type=attr_type)
+  }
+  
+  # Read graph data.
+  graph = multigraph(read_graphml_data(graphml_keys, xgraph))
+  
   # Read nodes.
-  graph = multigraph()
   for (xnode in xml_find_all(xgraph, "node")) {
     node = xml_required_attr(xnode, "id")
-    add_node(graph, node, read_graphml_data(xnode))
+    add_node(graph, node, read_graphml_data(graphml_keys, xnode))
   }
   
   # Read edges.
   for (xedge in xml_find_all(xgraph, "edge")) {
     src = xml_required_attr(xedge, "source")
     tgt = xml_required_attr(xedge, "target")
-    add_edge(graph, src, tgt, read_graphml_data(xedge))
+    add_edge(graph, src, tgt, read_graphml_data(graphml_keys, xedge))
   }
   
   graph
 }
 
-read_graphml_data <- function(xnode) {
-  # TODO
-  list()
+read_graphml_data <- function(graphml_keys, xelem) {
+  xdatas = xml_find_all(xelem, "data")
+  data = vector(mode="list", length=length(xdatas))
+  for (i in seq_along(xdatas)) {
+    xdata = xdatas[[i]]
+    key = graphml_keys[[xml_required_attr(xdata, "key")]]
+    names(data)[[i]] = key$attr_name
+    data[[i]] = read_graphml_data_value(key$attr_type, xml_text(xdata))
+  }
+  data
+}
+
+read_graphml_data_value <- function(attr_type, s) {
+  if (attr_type == "boolean") as.logical(s)
+  else if (attr_type == "int" || attr_type == "long") as.integer(s)
+  else if (attr_type == "float" || attr_type == "double") as.numeric(s)
+  else if (attr_type == "string") s
+  else stop(paste("Invalid GraphML data type:", attr_type))
 }
 
 #' Write graph to GraphML
@@ -65,8 +92,8 @@ write_graphml <- function(graph, file=NULL) {
     write_graphml_data(graphml_keys, xedge, edge_data(graph, src, tgt, ind))
   }
   
-  # Write key elements, based on attribute keys (data declarations) collected
-  # while writing graph, node, and edge data.
+  # Write key elements, based on attribute names and types collected while
+  # writing graph, node, and edge data.
   for (key in values(graphml_keys)) {
     xkey = xml_add_sibling(xgraph, "key", .where="before")
     xml_attrs(xkey) = key

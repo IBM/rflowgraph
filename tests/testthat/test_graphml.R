@@ -19,7 +19,6 @@ test_that("round trip attributed graph through GraphML", {
   add_edge(g, "u", "w", list(foo=2L))
   add_edge(g, "v", "w", list(foo=3L))
   xml = write_graphml(g)
-  #cat(as.character(xml, format=TRUE))
   h = read_graphml(xml)
-  #expect_equal(h, g)
+  expect_equal(h, g)
 })
