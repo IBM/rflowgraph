@@ -41,7 +41,7 @@ record_in_ast <- function(expr, context=NULL) {
 }
 
 
-skip_calls %<c-% c(
+skip_calls <- c(
   "function",
   "library",
   "loadNamespace",

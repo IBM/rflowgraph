@@ -5,8 +5,6 @@
 #' 
 #' @details The \code{dict} data type is a thin wrapper around an R environment.
 #' Unlike most R types, it is mutable and has pass-by-reference semantics.
-#' It exists because of the packages currently on CRAN, \code{hashmap} does
-#' not allow arbitrary value types and \code{hash} has a GPL license.
 #' 
 #' The \code{dict} interface is also implemented for lists, which can serve as
 #' immutable dictionaries (with linear time lookup).
