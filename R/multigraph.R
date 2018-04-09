@@ -34,23 +34,23 @@ multiedge <- function(src, tgt, ind) {
 nodes.multigraph <- function(g) keys(g$nodes)
 edges.multigraph <- function(g, src, tgt) {
   if (missing(src) && missing(tgt)) {
-    as.list(do.call(c, lapply(keys(g$succ), function(src) {
+    flatten(map(keys(g$succ), function(src) {
       succ = g$succ[[src]]
-      do.call(c, lapply(keys(succ), function(tgt) {
-        lapply(seq_along(succ[[tgt]]), function(ind) multiedge(src,tgt,ind))
+      flatten(map(keys(succ), function(tgt) {
+        map(seq_along(succ[[tgt]]), function(ind) multiedge(src,tgt,ind))
       }))
-    })))
+    }))
   } else {
-    lapply(seq_len(nedges(g,src,tgt)), function(ind) multiedge(src,tgt,ind))
+    map(seq_len(nedges(g,src,tgt)), function(ind) multiedge(src,tgt,ind))
   }
 }
 
 nnodes.multigraph <- function(g) length(g$nodes)
 nedges.multigraph <- function(g, src, tgt) {
   if (missing(src) && missing(tgt)) {
-    sum(vapply(values(g$succ), function(succ) {
-      sum(vapply(values(succ), length, 0L))
-    }, 0L))
+    sum(map_int(values(g$succ), function(succ) {
+      sum(map_int(values(succ), length))
+    }))
   } else {
     length(get_default(g$succ[[src]], tgt, list()))
   }

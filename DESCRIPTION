@@ -12,6 +12,7 @@ RoxygenNote: 6.0.1
 Imports:
   R6,
   rlang,
+  purrr,
   pryr,
   zeallot
 Suggests: testthat

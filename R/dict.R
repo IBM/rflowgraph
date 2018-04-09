@@ -28,7 +28,7 @@ keys.list <- function(l) names(l)
 
 #' @rdname dict
 values <- function(d) UseMethod("values")
-values.dict <- function(d) lapply(names(d), function(k) d[[k]])
+values.dict <- function(d) map(names(d), function(k) d[[k]])
 values.list <- function(l) unname(l)
 
 #' @rdname dict
