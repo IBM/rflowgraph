@@ -1,0 +1,23 @@
+context("wiring_diagram")
+
+test_that("add boxes and wires in a wiring diagram", {
+  g = wiring_diagram(c("x1","x2"), c("y1","y2"))
+  expect_true(has_node(g, input_node(g)))
+  expect_true(has_node(g, output_node(g)))
+  expect_equal(input_ports(g), c("x1","x2"))
+  expect_equal(output_ports(g), c("y1","y2"))
+  
+  add_node(g, "foo", c("w1","w2"), c("z1","z2"))
+  expect_true(has_node(g, "foo"))
+  expect_equal(input_ports(g, "foo"), c("w1","w2"))
+  expect_equal(output_ports(g, "foo"), c("z1","z2"))
+  
+  add_edge(g, input_node(g), "foo", "x1", "w1")
+  add_edge(g, input_node(g), "foo", "x2", "w2")
+  add_edge(g, "foo", output_node(g), "z1", "y1")
+  add_edge(g, "foo", output_node(g), "z2", "y2")
+  expect_equal(source_port(g, input_node(g), "foo", 1), "x1")
+  expect_equal(target_port(g, input_node(g), "foo", 1), "w1")
+  expect_equal(source_port(g, "foo", output_node(g), 2), "z2")
+  expect_equal(target_port(g, "foo", output_node(g), 2), "y2")
+})

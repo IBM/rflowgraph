@@ -6,6 +6,7 @@
 #' and predecessors. It is modeled on the \code{MultiDiGraph} class in the
 #' Python library NetworkX.
 #' 
+#' @seealso \code{\link{graph}}
 #' @export
 multigraph <- function(data=list()) multigraph_class$new(data=data)
 multigraph_class <- R6Class(

@@ -17,3 +17,6 @@ The internal data structure uses adjacency lists for successors
 and predecessors. It is modeled on the \code{MultiDiGraph} class in the
 Python library NetworkX.
 }
+\seealso{
+\code{\link{graph}}
+}
