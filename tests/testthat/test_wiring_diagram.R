@@ -2,6 +2,7 @@ context("wiring_diagram")
 
 test_that("add boxes and wires in a wiring diagram", {
   g = wiring_diagram(c("x1","x2"), c("y1","y2"))
+  expect_true(is_directed(g))
   expect_true(has_node(g, input_node(g)))
   expect_true(has_node(g, output_node(g)))
   expect_equal(input_ports(g), c("x1","x2"))

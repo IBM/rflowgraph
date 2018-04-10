@@ -9,6 +9,10 @@ graph <- function(...) stop("Abstract interface for graphs")
 
 #' @rdname graph
 #' @export
+is_directed <- function(g) UseMethod("is_directed")
+
+#' @rdname graph
+#' @export
 nodes <- function(g) UseMethod("nodes")
 
 #' @rdname graph

@@ -2,6 +2,7 @@ context("multigraph")
 
 test_that("add and remove nodes in a multigraph", {
   g = multigraph()
+  expect_true(is_directed(g))
   expect_equal(nodes(g), character())
   expect_equal(nnodes(g), 0)
   expect_false(has_node(g, "u"))

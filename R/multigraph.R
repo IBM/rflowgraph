@@ -32,6 +32,8 @@ multiedge <- function(src, tgt, ind) {
             class=c("multiedge", "edge"))
 }
 
+is_directed.multigraph <- function(g) TRUE
+
 nodes.multigraph <- function(g) keys(g$nodes)
 edges.multigraph <- function(g, src, tgt) {
   if (missing(src) && missing(tgt)) {

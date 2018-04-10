@@ -2,6 +2,7 @@
 % Please edit documentation in R/graph.R
 \name{graph}
 \alias{graph}
+\alias{is_directed}
 \alias{nodes}
 \alias{edges}
 \alias{nnodes}
@@ -19,6 +20,8 @@
 \title{Graphs}
 \usage{
 graph(...)
+
+is_directed(g)
 
 nodes(g)
 
