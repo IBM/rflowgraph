@@ -7,7 +7,7 @@
 #'
 #' @seealso \code{\link{multigraph}}, \code{\link{graph}}
 #' @export
-wiring_diagram <- function(in_ports, out_ports, data=list()) {
+wiring_diagram <- function(in_ports=list(), out_ports=list(), data=list()) {
   g = wiring_diagram_class$new(box_data$new(in_ports, out_ports, data))
   add_node.multigraph(g, input_node(g))
   add_node.multigraph(g, output_node(g))
@@ -72,7 +72,8 @@ graph_data.wiring_diagram <- function(g) {
   graph_data.multigraph(g)$data
 }
 `graph_data<-.wiring_diagram` <- function(g, value) {
-  graph_data.multigraph(g)$data <- value
+  data = graph_data.multigraph(g)
+  data$data <- value
   g
 }
 
@@ -80,7 +81,8 @@ node_data.wiring_diagram <- function(g, node) {
   node_data.multigraph(g, node)$data
 }
 `node_data<-.wiring_diagram` <- function(g, node, value) {
-  node_data.multigraph(g, node)$data <- value
+  data = node_data.multigraph(g, node)
+  data$data <- value
   g
 }
 
@@ -88,7 +90,8 @@ edge_data.wiring_diagram <- function(g, src, tgt, ind) {
   edge_data.multigraph(g, src, tgt, ind)$data
 }
 `edge_data<-.wiring_diagram` <- function(g, src, tgt, ind, value) {
-  edge_data.multigraph(g, src, tgt, ind)$data <- value
+  data = edge_data.multigraph(g, src, tgt, ind)
+  data$data <- value
   g
 }
 
