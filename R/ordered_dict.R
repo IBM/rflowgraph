@@ -10,10 +10,15 @@
 #' 
 #' @seealso \code{\link{dict}}
 ordered_dict <- function(...) {
-  data = list(...)
+  as_ordered_dict(list(...))
+}
+
+#' @rdname ordered_dict
+as_ordered_dict <- function(x) UseMethod("as_ordered_dict")
+as_ordered_dict.list <- function(x) {
   d = ordered_dict_class$new()
-  for (i in seq_along(data))
-    d[[names(data)[[i]]]] = data[[i]]
+  for (i in seq_along(x))
+    d[[names(x)[[i]]]] = x[[i]]
   d
 }
 

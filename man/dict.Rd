@@ -2,6 +2,7 @@
 % Please edit documentation in R/dict.R
 \name{dict}
 \alias{dict}
+\alias{as_dict}
 \alias{keys}
 \alias{values}
 \alias{has_key}
@@ -11,6 +12,8 @@
 \title{Dictionary}
 \usage{
 dict(...)
+
+as_dict(x)
 
 keys(d)
 

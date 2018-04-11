@@ -2,9 +2,12 @@
 % Please edit documentation in R/ordered_dict.R
 \name{ordered_dict}
 \alias{ordered_dict}
+\alias{as_ordered_dict}
 \title{Ordered dictionary}
 \usage{
 ordered_dict(...)
+
+as_ordered_dict(x)
 }
 \description{
 Data structure for ordered dictionaries,

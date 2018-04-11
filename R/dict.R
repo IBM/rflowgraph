@@ -9,7 +9,13 @@
 #' The \code{dict} interface is also implemented for lists, which can serve as
 #' immutable dictionaries (with linear time lookup).
 dict <- function(...) {
-  structure(list2env(list(...), hash=TRUE, parent=emptyenv()),
+  as_dict(list(...))
+}
+
+#' @rdname dict
+as_dict <- function(x) UseMethod("as_dict")
+as_dict.list <- function(x) {
+  structure(list2env(x, hash=TRUE, parent=emptyenv()),
             class="dict")
 }
 
