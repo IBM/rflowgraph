@@ -63,7 +63,7 @@ test_that("get successors and predecessors in a multigraph", {
   expect_equal(predecessors(g,"v"), "u")
 })
 
-test_that("get and set graph, node, and edge attributes in a multigraph", {
+test_that("get and set graph/node/edge attributes in a multigraph", {
   g = multigraph(data=list(foo=TRUE))
   expect_equal(graph_attr(g, "foo"), TRUE)
   expect_equal(graph_attr(g, "bar"), NULL)

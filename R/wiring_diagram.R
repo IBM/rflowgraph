@@ -106,16 +106,22 @@ wiring_diagram_class = R6Class(
 
 box_data <- R6Class("box_data",
   public = list(
-    input_ports = NULL,
-    output_ports = NULL,
+    input_ports = list(),
+    output_ports = list(),
     data = NULL,
     initialize = function(in_ports, out_ports, data=list()) {
-      self$input_ports = in_ports
-      self$output_ports = out_ports
+      self$input_ports = validate_ports(in_ports)
+      self$output_ports = validate_ports(out_ports)
       self$data = data
     }
   )
 )
+validate_ports <- function(ports) {
+  if (is.character(ports))
+    ports = setNames(rep(list(list()), length(ports)), ports)
+  stopifnot(is.list(ports) && is_named(ports))
+  ports
+}
 
 wire_data <- R6Class("wire_data",
   public = list(
