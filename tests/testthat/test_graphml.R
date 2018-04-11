@@ -31,5 +31,6 @@ test_that("round trip wiring diagram with no attributes through GraphML", {
   add_edge(g, "f", "g", "y", "y")
   add_edge(g, "f", output_node(g), "z", "z")
   xml = write_graphml(g)
-  #cat(as.character(xml, format=TRUE))
+  h = read_graphml(xml, wiring_diagram())
+  expect_equal(h, g)
 })

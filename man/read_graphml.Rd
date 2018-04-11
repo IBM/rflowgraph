@@ -4,7 +4,7 @@
 \alias{read_graphml}
 \title{Read graph from GraphML}
 \usage{
-read_graphml(xml)
+read_graphml(xml, graph = NULL)
 }
 \description{
 Read graph from GraphML

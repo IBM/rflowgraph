@@ -2,7 +2,7 @@
 #' 
 #' @import xml2
 #' @export
-read_graphml <- function(xml) {
+read_graphml <- function(xml, graph=NULL) {
   # Read XML document and top-level elements.
   if (!("xml_document" %in% class(xml)))
     xml = read_xml(xml)
@@ -23,8 +23,18 @@ read_graphml <- function(xml) {
     graphml_keys[[id]] = list(attr_name=attr_name, attr_type=attr_type)
   }
   
+  # Read graph.
+  if (is.null(graph))
+    graph = multigraph()
+  read_graphml_graph(graph, graphml_keys, xgraph)
+}
+
+read_graphml_graph <- function(graph, graphml_keys, xgraph)
+  UseMethod("read_graphml_graph")
+
+read_graphml_graph.graph <- function(graph, graphml_keys, xgraph) {
   # Read graph data.
-  graph = multigraph(read_graphml_data(graphml_keys, xgraph))
+  graph_data(graph) <- read_graphml_data(graphml_keys, xgraph)
   
   # Read nodes.
   for (xnode in xml_find_all(xgraph, "node")) {
@@ -40,6 +50,73 @@ read_graphml <- function(xml) {
   }
   
   graph
+}
+
+read_graphml_graph.wiring_diagram <- function(graph, graphml_keys, xgraph) {
+  # Read top-level node.
+  xnodes = xml_find_all(xgraph, "node")
+  if (length(xnodes) != 1)
+    stop("Root graph of GraphML document must contain exactly one <node>")
+  xparent = xnodes[[1]]
+  parent = xml_required_attr(xparent, "id")
+  
+  # Read subgraph of top-level node.
+  xgraphs = xml_find_all(xparent, "graph")
+  if (length(xgraphs) != 1)
+    stop("Node element can contain at most one <graph> (subgraph element)")
+  xgraph = xgraphs[[1]]
+  
+  # Read diagram ports and graph data.
+  c(in_ports, out_ports) %<-% read_graphml_ports(graphml_keys, xparent)
+  data = read_graphml_data(graphml_keys, xgraph)
+  # FIXME: Don't use private API. Make input/output ports mutable.
+  graph$data <- box_data$new(in_ports, out_ports, data)
+  
+  # Read nodes.
+  for (xnode in xml_find_all(xgraph, "node")) {
+    # TODO: Support nested wiring diagrams.
+    node = xml_required_attr(xnode, "id")
+    c(in_ports, out_ports) %<-% read_graphml_ports(graphml_keys, xnode)
+    data = read_graphml_data(graphml_keys, xnode)
+    add_node(graph, node, in_ports, out_ports, data)
+  }
+  
+  # Read edges.
+  for (xedge in xml_find_all(xgraph, "edge")) {
+    src = xml_required_attr(xedge, "source")
+    tgt = xml_required_attr(xedge, "target")
+    src_port = xml_required_attr(xedge, "sourceport")
+    tgt_port = xml_required_attr(xedge, "targetport")
+    data = read_graphml_data(graphml_keys, xedge)
+    if (src == parent) src = input_node(graph)
+    if (tgt == parent) tgt = output_node(graph)
+    add_edge(graph, src, tgt, src_port, tgt_port, data)
+  }
+  
+  graph
+}
+
+read_graphml_ports <- function(graphml_keys, xnode) {
+  in_ports = list()
+  out_ports = list()
+  for (xport in xml_find_all(xnode, "port")) {
+    name = xml_required_attr(xport, "name")
+    data = read_graphml_data(graphml_keys, xport)
+    i = match("portkind", names(data))
+    if (is.na(i))
+      stop("Port elements must have 'portkind' data")
+    
+    portkind = data[[i]]
+    data = data[-i]
+    port = setNames(list(if (is_empty(data)) list() else data), name)
+    if (portkind == "input")
+      in_ports = c(in_ports, port)
+    else if (portkind == "output")
+      out_ports = c(out_ports, port)
+    else
+      stop(paste("Port element has invalid 'portkind' data:", portkind))
+  }
+  list(input_ports=in_ports, output_ports=out_ports)
 }
 
 read_graphml_data <- function(graphml_keys, xelem) {
@@ -151,19 +228,17 @@ write_graphml_graph.wiring_diagram <- function(graph, graphml_keys, xgraph,
 write_graphml_ports <- function(graph, graphml_keys, xnode, node=NULL) {
   in_ports = input_ports(graph, node)
   for (i in seq_along(in_ports)) {
-    xport = xml_add_child(xnode, "port", name=port_name(in_ports, i))
+    xport = xml_add_child(xnode, "port", name=names(in_ports)[[i]])
     write_graphml_data(graphml_keys, xport, list(portkind="input"))
-    write_graphml_data(graphml_keys, xport, port_data(in_ports, i))
+    write_graphml_data(graphml_keys, xport, in_ports[[i]])
   }
   out_ports = output_ports(graph, node)
   for (i in seq_along(out_ports)) {
-    xport = xml_add_child(xnode, "port", name=port_name(out_ports, i))
+    xport = xml_add_child(xnode, "port", name=names(out_ports)[[i]])
     write_graphml_data(graphml_keys, xport, list(portkind="output"))
-    write_graphml_data(graphml_keys, xport, port_data(out_ports, i))
+    write_graphml_data(graphml_keys, xport, out_ports[[i]])
   }
 }
-port_name <- function(p, i) if (is.character(p)) p[[i]] else names(p)[[i]]
-port_data <- function(p, i) if (is.character(p)) NULL else p[[i]]
 
 write_graphml_data <- function(graphml_keys, xelem, data) {
   if (is.null(data)) return()
