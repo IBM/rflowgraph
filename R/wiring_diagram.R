@@ -31,9 +31,9 @@ add_node.wiring_diagram <- function(g, node, in_ports, out_ports, data=list()) {
 
 #' @rdname wiring_diagram
 #' @export
-input_ports <- function(g, node) UseMethod("input_ports")
-input_ports.wiring_diagram <- function(g, node) {
-  if (missing(node))
+input_ports <- function(g, node=NULL) UseMethod("input_ports")
+input_ports.wiring_diagram <- function(g, node=NULL) {
+  if (is.null(node))
     graph_data.multigraph(g)$input_ports
   else
     node_data.multigraph(g, node)$input_ports
@@ -41,9 +41,9 @@ input_ports.wiring_diagram <- function(g, node) {
 
 #' @rdname wiring_diagram
 #' @export
-output_ports <- function(g, node) UseMethod("output_ports")
-output_ports.wiring_diagram <- function(g, node) {
-  if (missing(node))
+output_ports <- function(g, node=NULL) UseMethod("output_ports")
+output_ports.wiring_diagram <- function(g, node=NULL) {
+  if (is.null(node))
     graph_data.multigraph(g)$output_ports
   else
     node_data.multigraph(g, node)$output_ports

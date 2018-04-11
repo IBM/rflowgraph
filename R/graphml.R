@@ -76,21 +76,9 @@ write_graphml <- function(graph, file=NULL) {
   
   # Create top-level graph element.
   graphml_keys = ordered_dict()
-  xgraph = xml_add_child(xml, "graph", edgedefault="directed")
-  write_graphml_data(graphml_keys, xgraph, graph_data(graph))
-  
-  # Create node elements.
-  for (node in nodes(graph)) {
-    xnode = xml_add_child(xgraph, "node", id=node)
-    write_graphml_data(graphml_keys, xnode, node_data(graph, node))
-  }
-  
-  # Create edge elements.
-  for (edge in edges(graph)) {
-    c(src, tgt, ind) %<-% unclass(edge)
-    xedge = xml_add_child(xgraph, "edge", source=src, target=tgt)
-    write_graphml_data(graphml_keys, xedge, edge_data(graph, src, tgt, ind))
-  }
+  xgraph = xml_add_child(xml, "graph",
+    edgedefault = if (is_directed(graph)) "directed" else "undirected")
+  write_graphml_graph(graph, graphml_keys, xgraph)
   
   # Write key elements, based on attribute names and types collected while
   # writing graph, node, and edge data.
@@ -105,6 +93,77 @@ write_graphml <- function(graph, file=NULL) {
   else
     xml
 }
+
+write_graphml_graph <- function(graph, graphml_keys, xelem)
+  UseMethod("write_graphml_graph")
+
+write_graphml_graph.graph <- function(graph, graphml_keys, xgraph) {
+  write_graphml_data(graphml_keys, xgraph, graph_data(graph))
+  
+  # Create node elements.
+  for (node in nodes(graph)) {
+    xnode = xml_add_child(xgraph, "node", id=node)
+    write_graphml_data(graphml_keys, xnode, node_data(graph, node))
+  }
+  
+  # Create edge elements.
+  for (edge in edges(graph)) {
+    c(src, tgt, ind) %<-% unclass(edge)
+    xedge = xml_add_child(xgraph, "edge", source=src, target=tgt)
+    write_graphml_data(graphml_keys, xedge, edge_data(graph, src, tgt, ind))
+  }
+}
+
+write_graphml_graph.wiring_diagram <- function(graph, graphml_keys, xgraph,
+                                               parent=NULL) {
+  # Create top-level node and graph.
+  if (is.null(parent))
+    parent = "__root__"
+  xparent = xml_add_child(xgraph, "node", id=parent)
+  write_graphml_ports(graph, graphml_keys, xparent)
+  
+  xgraph = xml_add_child(xparent, "graph")
+  write_graphml_data(graphml_keys, xgraph, graph_data(graph))
+  
+  # Create node elements.
+  skip_nodes = c(input_node(graph), output_node(graph))
+  for (node in nodes(graph)) {
+    # TODO: Support nested wiring diagrams.
+    if (node %in% skip_nodes) next
+    xnode = xml_add_child(xgraph, "node", id=node)
+    write_graphml_data(graphml_keys, xnode, node_data(graph, node))
+    write_graphml_ports(graph, graphml_keys, xnode, node)
+  }
+  
+  # Create edge elements.
+  for (edge in edges(graph)) {
+    c(src, tgt, ind) %<-% unclass(edge)
+    xedge = xml_add_child(xgraph, "edge",
+      source = if (src %in% skip_nodes) parent else src,
+      target = if (tgt %in% skip_nodes) parent else tgt,
+      sourceport = source_port(graph, src, tgt, ind),
+      targetport = target_port(graph, src, tgt, ind)
+    )
+    write_graphml_data(graphml_keys, xedge, edge_data(graph, src, tgt, ind))
+  }
+}
+
+write_graphml_ports <- function(graph, graphml_keys, xnode, node=NULL) {
+  in_ports = input_ports(graph, node)
+  for (i in seq_along(in_ports)) {
+    xport = xml_add_child(xnode, "port", name=port_name(in_ports, i))
+    write_graphml_data(graphml_keys, xport, list(portkind="input"))
+    write_graphml_data(graphml_keys, xport, port_data(in_ports, i))
+  }
+  out_ports = output_ports(graph, node)
+  for (i in seq_along(out_ports)) {
+    xport = xml_add_child(xnode, "port", name=port_name(out_ports, i))
+    write_graphml_data(graphml_keys, xport, list(portkind="output"))
+    write_graphml_data(graphml_keys, xport, port_data(out_ports, i))
+  }
+}
+port_name <- function(p, i) if (is.character(p)) p[[i]] else names(p)[[i]]
+port_data <- function(p, i) if (is.character(p)) NULL else p[[i]]
 
 write_graphml_data <- function(graphml_keys, xelem, data) {
   if (is.null(data)) return()
