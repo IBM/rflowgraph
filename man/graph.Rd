@@ -19,8 +19,6 @@
 \alias{predecessors}
 \title{Graphs}
 \usage{
-graph(...)
-
 is_directed(g)
 
 nodes(g)

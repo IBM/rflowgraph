@@ -1,7 +1,7 @@
 #' Wiring diagrams
 #' 
-#' @description Wiring diagrams (aka string diagrams) with arbitrary node/edge
-#' data.
+#' @description Wiring diagrams (aka string diagrams) with arbitrary
+#' node/port/edge data.
 #' 
 #' @details The implementation is a simple wrapper around \code{multigraph}.
 #'
@@ -14,6 +14,40 @@ wiring_diagram <- function(input_ports=list(), output_ports=list(),
   add_node.multigraph(g, output_node(g))
   g
 }
+wiring_diagram_class <- R6Class(
+  classname = "wiring_diagram",
+  inherit = multigraph_class,
+  public = list(
+    input_node = "__in__",
+    output_node = "__out__"
+  )
+)
+
+box_data <- R6Class("box_data",
+  public = list(
+    input_ports = NULL,
+    output_ports = NULL,
+    data = NULL,
+    initialize = function(in_ports=list(), out_ports=list(), data=list()) {
+      self$input_ports = coerce_ports(in_ports)
+      self$output_ports = coerce_ports(out_ports)
+      self$data = data
+    }
+  )
+)
+
+wire_data <- R6Class("wire_data",
+ public = list(
+   source_port = character(),
+   target_port = character(),
+   data = NULL,
+   initialize = function(src_port, tgt_port, data=list()) {
+     self$source_port = src_port
+     self$target_port = tgt_port
+     self$data = data
+   }
+ )
+)
 
 #' @rdname wiring_diagram
 #' @export
@@ -33,14 +67,14 @@ add_node.wiring_diagram <- function(g, node, input_ports=list(),
 
 #' @rdname wiring_diagram
 #' @export
-input_ports <- function(g, node) UseMethod("input_ports")
+input_ports <- function(g, node=NULL) UseMethod("input_ports")
 input_ports.wiring_diagram <- function(g, node=NULL) {
   keys(graph_or_node_data(g, node)$input_ports)
 }
 
 #' @rdname wiring_diagram
 #' @export
-`input_ports<-` <- function(g, node, value) UseMethod("input_ports<-")
+`input_ports<-` <- function(g, node=NULL, value) UseMethod("input_ports<-")
 `input_ports<-.wiring_diagram` <- function(g, node=NULL, value) {
   data = graph_or_node_data(g, node)
   data$input_ports = coerce_ports(value)
@@ -49,14 +83,14 @@ input_ports.wiring_diagram <- function(g, node=NULL) {
 
 #' @rdname wiring_diagram
 #' @export
-output_ports <- function(g, node) UseMethod("output_ports")
+output_ports <- function(g, node=NULL) UseMethod("output_ports")
 output_ports.wiring_diagram <- function(g, node=NULL) {
   keys(graph_or_node_data(g, node)$output_ports)
 }
 
 #' @rdname wiring_diagram
 #' @export
-`output_ports<-` <- function(g, node, value) UseMethod("output_ports<-")
+`output_ports<-` <- function(g, node=NULL, value) UseMethod("output_ports<-")
 `output_ports<-.wiring_diagram` <- function(g, node=NULL, value) {
   data = graph_or_node_data(g, node)
   data$output_ports = coerce_ports(value)
@@ -64,7 +98,7 @@ output_ports.wiring_diagram <- function(g, node=NULL) {
 }
 
 graph_or_node_data <- function(g, node=NULL) {
-  if (is.null(node))
+  if (is.null(node) || node == input_node(g) || node == output_node(g))
     graph_data.multigraph(g)
   else
     node_data.multigraph(g, node)
@@ -122,71 +156,79 @@ edge_data.wiring_diagram <- function(g, src, tgt, ind) {
   g
 }
 
-#' @rdname wiring_diagram
+#' Wiring diagram data
+#' 
+#' @description In addition to the usual graph/node/edge data, wiring diagrams
+#' allow arbitrary data on input and output ports.
+#' 
+#' @name wiring_diagram_data
+#' @seealso \code{\link{graph_data}}
+NULL
+
+#' @rdname wiring_diagram_data
 #' @export
-input_port_data <- function(g, node, name) UseMethod("input_port_data")
-input_port_data.wiring_diagram <- function(g, node=NULL, name) {
-  graph_or_node_data(g, node)$input_ports[[name]]
+input_port_data <- function(g, node, port) UseMethod("input_port_data")
+input_port_data.wiring_diagram <- function(g, node, port) {
+  graph_or_node_data(g, node)$input_ports[[port]]
 }
 
-#' @rdname wiring_diagram
+#' @rdname wiring_diagram_data
 #' @export
-`input_port_data<-` <- function(g, node, name, value)
+`input_port_data<-` <- function(g, node, port, value)
   UseMethod("input_port_data<-")
-`input_port_data<-.wiring_diagram` <- function(g, node=NULL, name, value) {
+`input_port_data<-.wiring_diagram` <- function(g, node, port, value) {
   data = graph_or_node_data(g, node)$input_ports
-  data[[name]] <- value
+  data[[port]] <- value
   g
 }
 
-#' @rdname wiring_diagram
+#' @rdname wiring_diagram_data
 #' @export
-output_port_data <- function(g, node, name) UseMethod("output_port_data")
-output_port_data.wiring_diagram <- function(g, node=NULL, name) {
-  graph_or_node_data(g, node)$output_ports[[name]]
+input_port_attr <- function(g, node, port, key) UseMethod("input_port_attr")
+input_port_attr.wiring_diagram <- function(g, node, port, key) {
+  graph_or_node_data(g, node)$input_ports[[port]][[key]]
 }
 
-#' @rdname wiring_diagram
+#' @rdname wiring_diagram_data
 #' @export
-`output_port_data<-` <- function(g, node, name, value)
+`input_port_attr<-` <- function(g, node, port, key, value)
+  UseMethod("input_port_attr<-")
+`input_port_attr<-.wiring_diagram` <- function(g, node, port, key, value) {
+  data = graph_or_node_data(g, node)$input_ports
+  data[[port]][[key]] = value
+  g
+}
+
+#' @rdname wiring_diagram_data
+#' @export
+output_port_data <- function(g, node, port) UseMethod("output_port_data")
+output_port_data.wiring_diagram <- function(g, node, port) {
+  graph_or_node_data(g, node)$output_ports[[port]]
+}
+
+#' @rdname wiring_diagram_data
+#' @export
+`output_port_data<-` <- function(g, node, port, value)
   UseMethod("output_port_data<-")
-`output_port_data<-.wiring_diagram` <- function(g, node=NULL, name, value) {
+`output_port_data<-.wiring_diagram` <- function(g, node, port, value) {
   data = graph_or_node_data(g, node)$output_ports
-  data[[name]] <- value
+  data[[port]] <- value
   g
 }
 
-wiring_diagram_class = R6Class(
-  classname = "wiring_diagram",
-  inherit = multigraph_class,
-  public = list(
-    input_node = "__in__",
-    output_node = "__out__"
-  )
-)
+#' @rdname wiring_diagram_data
+#' @export
+output_port_attr <- function(g, node, port, key) UseMethod("output_port_attr")
+output_port_attr.wiring_diagram <- function(g, node, port, key) {
+  graph_or_node_data(g, node)$output_ports[[port]][[key]]
+}
 
-box_data <- R6Class("box_data",
-  public = list(
-    input_ports = NULL,
-    output_ports = NULL,
-    data = NULL,
-    initialize = function(in_ports=list(), out_ports=list(), data=list()) {
-      self$input_ports = coerce_ports(in_ports)
-      self$output_ports = coerce_ports(out_ports)
-      self$data = data
-    }
-  )
-)
-
-wire_data <- R6Class("wire_data",
-  public = list(
-    source_port = character(),
-    target_port = character(),
-    data = NULL,
-    initialize = function(src_port, tgt_port, data=list()) {
-      self$source_port = src_port
-      self$target_port = tgt_port
-      self$data = data
-    }
-  )
-)
+#' @rdname wiring_diagram_data
+#' @export
+`output_port_attr<-` <- function(g, node, port, key, value)
+  UseMethod("output_port_attr<-")
+`output_port_attr<-.wiring_diagram` <- function(g, node, port, key, value) {
+  data = graph_or_node_data(g, node)$output_ports
+  data[[port]][[key]] = value
+  g
+}

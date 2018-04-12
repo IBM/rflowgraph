@@ -5,7 +5,9 @@
 #' 
 #' @details Unlike most R objects, graphs are mutable and have
 #' pass-by-reference semantics.
-graph <- function(...) stop("Abstract interface for graphs")
+#'
+#' @name graph
+NULL
 
 #' @rdname graph
 #' @export

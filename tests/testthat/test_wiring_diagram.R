@@ -24,14 +24,19 @@ test_that("add boxes and wires in a wiring diagram", {
 })
 
 test_that("get and set graph/node/port/edge attributes in a wiring diagram", {
-  g = wiring_diagram(data=list(foo=TRUE))
-  expect_true(has_node(g, input_node(g)))
-  expect_true(has_node(g, output_node(g)))
+  g = wiring_diagram("x", "z", data=list(foo=TRUE))
   expect_equal(graph_attr(g, "foo"), TRUE)
   expect_equal(graph_attr(g, "bar"), NULL)
+  expect_equal(input_port_attr(g, input_node(g), "x", "foo"), NULL)
+  expect_equal(output_port_attr(g, output_node(g), "z", "foo"), NULL)
+  
+  input_port_attr(g, input_node(g), "x", "foo") <- TRUE
+  output_port_attr(g, output_node(g), "z", "foo") <- FALSE
   graph_attr(g, "bar") <- FALSE
   expect_equal(graph_attr(g, "foo"), TRUE)
   expect_equal(graph_attr(g, "bar"), FALSE)
+  expect_equal(input_port_attr(g, input_node(g), "x", "foo"), TRUE)
+  expect_equal(output_port_attr(g, output_node(g), "z", "foo"), FALSE)
   
   add_node(g, "f", "x", "y", data=list(foo=TRUE))
   add_node(g, "g", "y", "z")
@@ -41,10 +46,17 @@ test_that("get and set graph/node/port/edge attributes in a wiring diagram", {
   expect_equal(output_port_data(g, "f", "y"), list(biz=FALSE))
   expect_equal(input_port_data(g, "g", "y"), list())
   expect_equal(output_port_data(g, "g", "z"), list())
+  expect_equal(input_port_attr(g, "f", "x", "biz"), TRUE)
+  expect_equal(output_port_attr(g, "f", "y", "biz"), FALSE)
   expect_equal(node_attr(g, "f", "foo"), TRUE)
   expect_equal(node_attr(g, "g", "foo"), NULL)
+  
+  input_port_attr(g, "f", "x", "biz") <- FALSE
+  output_port_attr(g, "f", "y", "biz") <- TRUE
   node_attr(g, "g", "foo") <- TRUE
   node_attr(g, "g", "bar") <- FALSE
+  expect_equal(input_port_attr(g, "f", "x", "biz"), FALSE)
+  expect_equal(output_port_attr(g, "f", "y", "biz"), TRUE)
   expect_equal(node_attr(g, "g", "foo"), TRUE)
   expect_equal(node_attr(g, "g", "bar"), FALSE)
   
