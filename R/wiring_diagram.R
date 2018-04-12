@@ -106,7 +106,7 @@ graph_or_node_data <- function(g, node=NULL) {
 
 coerce_ports <- function(ports) {
   if (is.character(ports))
-    ports = setNames(map(seq_along(ports), ~list()), ports)
+    ports = set_names(map(seq_along(ports), ~list()), ports)
   as_ordered_dict(ports)
 }
 
