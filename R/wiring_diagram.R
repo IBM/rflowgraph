@@ -7,8 +7,9 @@
 #'
 #' @seealso \code{\link{multigraph}}, \code{\link{graph}}
 #' @export
-wiring_diagram <- function(in_ports=list(), out_ports=list(), data=list()) {
-  g = wiring_diagram_class$new(box_data$new(in_ports, out_ports, data))
+wiring_diagram <- function(input_ports=list(), output_ports=list(),
+                           data=list()) {
+  g = wiring_diagram_class$new(box_data$new(input_ports, output_ports, data))
   add_node.multigraph(g, input_node(g))
   add_node.multigraph(g, output_node(g))
   g
@@ -25,28 +26,54 @@ output_node <- function(g) UseMethod("output_node")
 output_node.wiring_diagram <- function(g) g$output_node
 
 #' @rdname wiring_diagram
-add_node.wiring_diagram <- function(g, node, in_ports, out_ports, data=list()) {
-  add_node.multigraph(g, node, box_data$new(in_ports, out_ports, data))
+add_node.wiring_diagram <- function(g, node, input_ports=list(),
+                                    output_ports=list(), data=list()) {
+  add_node.multigraph(g, node, box_data$new(input_ports, output_ports, data))
 }
 
 #' @rdname wiring_diagram
 #' @export
-input_ports <- function(g, node=NULL) UseMethod("input_ports")
+input_ports <- function(g, node) UseMethod("input_ports")
 input_ports.wiring_diagram <- function(g, node=NULL) {
-  if (is.null(node))
-    graph_data.multigraph(g)$input_ports
-  else
-    node_data.multigraph(g, node)$input_ports
+  keys(graph_or_node_data(g, node)$input_ports)
 }
 
 #' @rdname wiring_diagram
 #' @export
-output_ports <- function(g, node=NULL) UseMethod("output_ports")
+`input_ports<-` <- function(g, node, value) UseMethod("input_ports<-")
+`input_ports<-.wiring_diagram` <- function(g, node=NULL, value) {
+  data = graph_or_node_data(g, node)
+  data$input_ports = coerce_ports(value)
+  g
+}
+
+#' @rdname wiring_diagram
+#' @export
+output_ports <- function(g, node) UseMethod("output_ports")
 output_ports.wiring_diagram <- function(g, node=NULL) {
+  keys(graph_or_node_data(g, node)$output_ports)
+}
+
+#' @rdname wiring_diagram
+#' @export
+`output_ports<-` <- function(g, node, value) UseMethod("output_ports<-")
+`output_ports<-.wiring_diagram` <- function(g, node=NULL, value) {
+  data = graph_or_node_data(g, node)
+  data$output_ports = coerce_ports(value)
+  g
+}
+
+graph_or_node_data <- function(g, node=NULL) {
   if (is.null(node))
-    graph_data.multigraph(g)$output_ports
+    graph_data.multigraph(g)
   else
-    node_data.multigraph(g, node)$output_ports
+    node_data.multigraph(g, node)
+}
+
+coerce_ports <- function(ports) {
+  if (is.character(ports))
+    ports = setNames(map(seq_along(ports), ~list()), ports)
+  as_ordered_dict(ports)
 }
 
 #' @rdname wiring_diagram
@@ -95,6 +122,40 @@ edge_data.wiring_diagram <- function(g, src, tgt, ind) {
   g
 }
 
+#' @rdname wiring_diagram
+#' @export
+input_port_data <- function(g, node, name) UseMethod("input_port_data")
+input_port_data.wiring_diagram <- function(g, node=NULL, name) {
+  graph_or_node_data(g, node)$input_ports[[name]]
+}
+
+#' @rdname wiring_diagram
+#' @export
+`input_port_data<-` <- function(g, node, name, value)
+  UseMethod("input_port_data<-")
+`input_port_data<-.wiring_diagram` <- function(g, node=NULL, name, value) {
+  data = graph_or_node_data(g, node)$input_ports
+  data[[name]] <- value
+  g
+}
+
+#' @rdname wiring_diagram
+#' @export
+output_port_data <- function(g, node, name) UseMethod("output_port_data")
+output_port_data.wiring_diagram <- function(g, node=NULL, name) {
+  graph_or_node_data(g, node)$output_ports[[name]]
+}
+
+#' @rdname wiring_diagram
+#' @export
+`output_port_data<-` <- function(g, node, name, value)
+  UseMethod("output_port_data<-")
+`output_port_data<-.wiring_diagram` <- function(g, node=NULL, name, value) {
+  data = graph_or_node_data(g, node)$output_ports
+  data[[name]] <- value
+  g
+}
+
 wiring_diagram_class = R6Class(
   classname = "wiring_diagram",
   inherit = multigraph_class,
@@ -106,22 +167,16 @@ wiring_diagram_class = R6Class(
 
 box_data <- R6Class("box_data",
   public = list(
-    input_ports = list(),
-    output_ports = list(),
+    input_ports = NULL,
+    output_ports = NULL,
     data = NULL,
-    initialize = function(in_ports, out_ports, data=list()) {
-      self$input_ports = validate_ports(in_ports)
-      self$output_ports = validate_ports(out_ports)
+    initialize = function(in_ports=list(), out_ports=list(), data=list()) {
+      self$input_ports = coerce_ports(in_ports)
+      self$output_ports = coerce_ports(out_ports)
       self$data = data
     }
   )
 )
-validate_ports <- function(ports) {
-  if (is.character(ports))
-    ports = setNames(rep(list(list()), length(ports)), ports)
-  stopifnot(is.list(ports) && is_named(ports))
-  ports
-}
 
 wire_data <- R6Class("wire_data",
   public = list(

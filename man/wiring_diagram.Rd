@@ -6,23 +6,34 @@
 \alias{output_node}
 \alias{add_node.wiring_diagram}
 \alias{input_ports}
+\alias{input_ports<-}
 \alias{output_ports}
+\alias{output_ports<-}
 \alias{add_edge.wiring_diagram}
 \alias{source_port}
 \alias{target_port}
+\alias{input_port_data}
+\alias{input_port_data<-}
+\alias{output_port_data}
+\alias{output_port_data<-}
 \title{Wiring diagrams}
 \usage{
-wiring_diagram(in_ports = list(), out_ports = list(), data = list())
+wiring_diagram(input_ports = list(), output_ports = list(), data = list())
 
 input_node(g)
 
 output_node(g)
 
-\method{add_node}{wiring_diagram}(g, node, in_ports, out_ports, data = list())
+\method{add_node}{wiring_diagram}(g, node, input_ports = list(),
+  output_ports = list(), data = list())
 
-input_ports(g, node = NULL)
+input_ports(g, node)
 
-output_ports(g, node = NULL)
+input_ports(g, node) <- value
+
+output_ports(g, node)
+
+output_ports(g, node) <- value
 
 \method{add_edge}{wiring_diagram}(g, src, tgt, src_port, tgt_port,
   data = list())
@@ -30,6 +41,14 @@ output_ports(g, node = NULL)
 source_port(g, src, tgt, ind)
 
 target_port(g, src, tgt, ind)
+
+input_port_data(g, node, name)
+
+input_port_data(g, node, name) <- value
+
+output_port_data(g, node, name)
+
+output_port_data(g, node, name) <- value
 }
 \description{
 Wiring diagrams (aka string diagrams) with arbitrary node/edge

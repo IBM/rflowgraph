@@ -14,6 +14,7 @@ dict <- function(...) {
 
 #' @rdname dict
 as_dict <- function(x) UseMethod("as_dict")
+as_dict.dict <- identity
 as_dict.list <- function(x) {
   structure(list2env(x, hash=TRUE, parent=emptyenv()),
             class="dict")

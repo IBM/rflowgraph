@@ -15,6 +15,7 @@ ordered_dict <- function(...) {
 
 #' @rdname ordered_dict
 as_ordered_dict <- function(x) UseMethod("as_ordered_dict")
+as_ordered_dict.ordered_dict <- identity
 as_ordered_dict.list <- function(x) {
   d = ordered_dict_class$new()
   for (i in seq_along(x))

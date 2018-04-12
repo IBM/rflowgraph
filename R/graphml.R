@@ -68,9 +68,9 @@ read_graphml_graph.wiring_diagram <- function(graph, graphml_keys, xgraph) {
   
   # Read diagram ports and graph data.
   c(in_ports, out_ports) %<-% read_graphml_ports(graphml_keys, xparent)
-  data = read_graphml_data(graphml_keys, xgraph)
-  # FIXME: Don't use private API. Make input/output ports mutable.
-  graph$data <- box_data$new(in_ports, out_ports, data)
+  input_ports(graph) <- in_ports
+  output_ports(graph) <- out_ports
+  graph_data(graph) <-read_graphml_data(graphml_keys, xgraph)
   
   # Read nodes.
   for (xnode in xml_find_all(xgraph, "node")) {
@@ -97,8 +97,8 @@ read_graphml_graph.wiring_diagram <- function(graph, graphml_keys, xgraph) {
 }
 
 read_graphml_ports <- function(graphml_keys, xnode) {
-  in_ports = list()
-  out_ports = list()
+  in_ports = ordered_dict()
+  out_ports = ordered_dict()
   for (xport in xml_find_all(xnode, "port")) {
     name = xml_required_attr(xport, "name")
     data = read_graphml_data(graphml_keys, xport)
@@ -108,11 +108,11 @@ read_graphml_ports <- function(graphml_keys, xnode) {
     
     portkind = data[[i]]
     data = data[-i]
-    port = setNames(list(if (is_empty(data)) list() else data), name)
+    if (is_empty(data)) data = list()
     if (portkind == "input")
-      in_ports = c(in_ports, port)
+      in_ports[[name]] = data
     else if (portkind == "output")
-      out_ports = c(out_ports, port)
+      out_ports[[name]] = data
     else
       stop(paste("Port element has invalid 'portkind' data:", portkind))
   }
@@ -226,17 +226,15 @@ write_graphml_graph.wiring_diagram <- function(graph, graphml_keys, xgraph,
 }
 
 write_graphml_ports <- function(graph, graphml_keys, xnode, node=NULL) {
-  in_ports = input_ports(graph, node)
-  for (i in seq_along(in_ports)) {
-    xport = xml_add_child(xnode, "port", name=names(in_ports)[[i]])
+  for (name in input_ports(graph, node)) {
+    xport = xml_add_child(xnode, "port", name=name)
     write_graphml_data(graphml_keys, xport, list(portkind="input"))
-    write_graphml_data(graphml_keys, xport, in_ports[[i]])
+    write_graphml_data(graphml_keys, xport, input_port_data(graph, node, name))
   }
-  out_ports = output_ports(graph, node)
-  for (i in seq_along(out_ports)) {
-    xport = xml_add_child(xnode, "port", name=names(out_ports)[[i]])
+  for (name in output_ports(graph, node)) {
+    xport = xml_add_child(xnode, "port", name=name)
     write_graphml_data(graphml_keys, xport, list(portkind="output"))
-    write_graphml_data(graphml_keys, xport, out_ports[[i]])
+    write_graphml_data(graphml_keys, xport, output_port_data(graph, node, name))
   }
 }
 
