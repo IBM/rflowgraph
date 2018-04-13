@@ -102,7 +102,7 @@ read_graphml_ports <- function(graphml_keys, xnode) {
   for (xport in xml_find_all(xnode, "port")) {
     name = xml_required_attr(xport, "name")
     data = read_graphml_data(graphml_keys, xport)
-    i = match("portkind", names(data))
+    i = match("portkind", names2(data))
     if (is.na(i))
       stop("Port elements must have 'portkind' data")
     

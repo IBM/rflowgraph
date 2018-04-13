@@ -15,8 +15,9 @@ Imports:
   jsonlite,
   purrr,
   R6,
-  RSQLite,
   rlang,
+  RSQLite,
+  sofa,
   zeallot
 Suggests:
   testthat (>= 2.0.0)
