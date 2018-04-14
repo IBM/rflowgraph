@@ -50,12 +50,16 @@ annotation_db <- R6Class("annotation_db",
       dplyr::tbl(private$conn, "annotations")
     },
     load_documents = function(docs) {
+      notes = private$notes
       required = c("package", "id", "kind")
       optional = c("system", "class", "method", "function")
       df = map_dfr(docs, function(doc) {
         stopifnot(doc$schema == "annotation" && doc$language == "r")
         key = paste(doc$package, "/", doc$id, sep="")
-        private$notes[[key]] = doc
+        if (has_key(notes, key))
+          stop(paste("Annotation already loaded:", key))
+        notes[[key]] = doc
+        
         c(list(key=key),
           set_names(map(required, ~ get_default(doc,.,stop("bad note"))), required),
           set_names(map(optional, ~ get_default(doc,.,NA_character_)), optional))
@@ -135,38 +139,4 @@ default_remote_annotation_db_config <- list(
   port = NULL,
   transport = "https",
   dbname = "data-science-ontology"
-)
-
-#' Annotator
-#' 
-#' @description Assign annotations to R classes, functions, and methods.
-#' 
-#' @name annotator
-#' @seealso \code{\link{annotation_db}}, \code{\link{remote_annotation_db}}
-NULL
-
-#' @export
-annotator <- R6Class("annotator",
-  public = list(
-    initialize = function(db=NULL) {
-      private$db = db = if (is.null(db)) remote_annotation_db$new() else db
-      private$loaded = loaded = dict()
-      
-      stopifnot(inherits(db, "annotation_db"))
-      if (inherits(db, "remote_annotation_db")) {
-        for (package in db$list_packages())
-          loaded[[package]] = FALSE
-      }
-    }
-  ),
-  private = list(
-    db = NULL,
-    loaded = NULL,
-    load = function(package) {
-      if (!get_default(private$loaded, package, TRUE)) {
-        private$db$load_package(package)
-        private$loaded[[package]] = TRUE
-      }
-    }
-  )
 )
