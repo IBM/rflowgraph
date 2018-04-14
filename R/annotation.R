@@ -100,6 +100,14 @@ remote_annotation_db <- R6Class("remote_annotation_db",
       private$dbname = config[[i]]
       super$initialize()
     },
+    list_packages = function() {
+      # Row keys are triples (schema, language, package).
+      result = sofa::design_search(private$cushion, private$dbname, "query",
+                                   "annotation_index", list(group=TRUE))
+      result$rows %>%
+        keep(function(row) row$key[[2]] == "r") %>%
+        map_chr(function(row) row$key[[3]])
+    },
     load_all_packages = function() {
       result = sofa::db_query(private$cushion, private$dbname, selector=list(
         schema = "annotation",
@@ -127,4 +135,38 @@ default_remote_annotation_db_config <- list(
   port = NULL,
   transport = "https",
   dbname = "data-science-ontology"
+)
+
+#' Annotator
+#' 
+#' @description Assign annotations to R classes, functions, and methods.
+#' 
+#' @name annotator
+#' @seealso \code{\link{annotation_db}}, \code{\link{remote_annotation_db}}
+NULL
+
+#' @export
+annotator <- R6Class("annotator",
+  public = list(
+    initialize = function(db=NULL) {
+      private$db = db = if (is.null(db)) remote_annotation_db$new() else db
+      private$loaded = loaded = dict()
+      
+      stopifnot(inherits(db, "annotation_db"))
+      if (inherits(db, "remote_annotation_db")) {
+        for (package in db$list_packages())
+          loaded[[package]] = FALSE
+      }
+    }
+  ),
+  private = list(
+    db = NULL,
+    loaded = NULL,
+    load = function(package) {
+      if (!get_default(private$loaded, package, TRUE)) {
+        private$db$load_package(package)
+        private$loaded[[package]] = TRUE
+      }
+    }
+  )
 )
