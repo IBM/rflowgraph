@@ -1,0 +1,22 @@
+[
+  {
+    "schema": "annotation",
+    "language": "r",
+    "package": "base",
+    "id": "integer",
+    "kind": "object",
+    "class": "integer",
+    "system": "S3",
+    "definition": "number"
+  },
+  {
+    "schema": "annotation",
+    "language": "r",
+    "package": "base",
+    "id": "numeric",
+    "kind": "object",
+    "class": "numeric",
+    "system": "S3",
+    "definition": "number"
+  }
+]

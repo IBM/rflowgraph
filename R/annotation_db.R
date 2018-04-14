@@ -67,7 +67,8 @@ annotation_db <- R6Class("annotation_db",
       DBI::dbWriteTable(private$conn, "annotations", df, append=TRUE)
     },
     load_json = function(txt) {
-      self$load_documents(jsonlite::fromJSON(txt))
+      docs = jsonlite::fromJSON(txt, simplifyDataFrame=FALSE)
+      self$load_documents(docs)
     }
   ),
   private = list(
