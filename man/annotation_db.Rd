@@ -6,3 +6,13 @@
 \description{
 Database of class, function, and method annotations.
 }
+\section{Methods}{
+
+\code{load_documents(docs)} \cr
+Load a list of (parsed) JSON documents conforming to the JSON schema for
+annotations.
+
+\code{load_json(txt)} \cr
+Load documents from a JSON string, URL, or file.
+}
+

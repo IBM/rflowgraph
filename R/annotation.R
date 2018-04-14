@@ -2,6 +2,14 @@
 #' 
 #' @description Database of class, function, and method annotations.
 #' 
+#' @section Methods:
+#' \code{load_documents(docs)} \cr
+#' Load a list of (parsed) JSON documents conforming to the JSON schema for
+#' annotations.
+#' 
+#' \code{load_json(txt)} \cr
+#' Load documents from a JSON string, URL, or file.
+#' 
 #' @name annotation_db
 NULL
 
@@ -45,6 +53,7 @@ annotation_db <- R6Class("annotation_db",
       required = c("package", "id", "kind")
       optional = c("system", "class", "method", "function")
       df = map_dfr(docs, function(doc) {
+        stopifnot(doc$schema == "annotation" && doc$language == "r")
         key = paste(doc$package, "/", doc$id, sep="")
         private$notes[[key]] = doc
         c(list(key=key),
@@ -63,11 +72,28 @@ annotation_db <- R6Class("annotation_db",
   )
 )
 
+#' Remote annotation DB
+#' 
+#' @description Annotation database that fetches annotations from a remote 
+#' CouchDB database.
+#' 
+#' @section Methods:
+#' \code{load_all_packages()} \cr
+#' Load annotations for all R packages.
+#' 
+#' \code{load_package(package)} \cr
+#' Load annotations for a specific R package.
+#' 
+#' @name remote_annotation_db
+#' @seealso \code{\link{annotation_db}}
+NULL
+
 #' @export
 remote_annotation_db <- R6Class("remote_annotation_db",
   inherit = annotation_db,
   public = list(
-    initialize = function(config=default_remote_annotation_db_config) {
+    initialize = function(config=NULL) {
+      if (is.null(config)) config = default_remote_annotation_db_config
       i = match("dbname", names2(config))
       stopifnot(!is.na(i))
       private$cushion = invoke(sofa::Cushion$new, config[-i])
