@@ -57,5 +57,8 @@ fun_package <- function(fun) {
 #' 
 #' @seealso \code{\link{fun_package}}
 obj_package <- function(x) {
+  # Obviously not possible for S3 classes, which are completely informal.
+  # In general, not possible for R6 classes either:
+  # https://github.com/r-lib/R6/issues/144
   attr(class(x), "package")
 }
