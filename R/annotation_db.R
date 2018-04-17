@@ -57,7 +57,7 @@ annotation_db <- R6Class("annotation_db",
         stopifnot(doc$schema == "annotation" && doc$language == "r")
         key = paste(doc$language, doc$package, doc$id, sep="/")
         if (has_key(notes, key))
-          stop(paste("Annotation already loaded:", key))
+          stop("Annotation already loaded: ", key)
         notes[[key]] = doc
         
         c(list(key=key),

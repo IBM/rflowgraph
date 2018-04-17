@@ -114,7 +114,7 @@ read_graphml_ports <- function(graphml_keys, xnode) {
     else if (portkind == "output")
       out_ports[[name]] = data
     else
-      stop(paste("Port element has invalid 'portkind' data:", portkind))
+      stop("Port element has invalid 'portkind' data: ", portkind)
   }
   list(input_ports=in_ports, output_ports=out_ports)
 }
@@ -136,7 +136,7 @@ read_graphml_data_value <- function(attr_type, s) {
   else if (attr_type == "int" || attr_type == "long") as.integer(s)
   else if (attr_type == "float" || attr_type == "double") as.numeric(s)
   else if (attr_type == "string") s
-  else stop(paste("Invalid GraphML data type:", attr_type))
+  else stop("Invalid GraphML data type: ", attr_type)
 }
 
 #' Write graph to GraphML
@@ -262,7 +262,7 @@ write_graphml_data_type <- function(type) {
   else if (type == "integer") "int"
   else if (type == "double") "double"
   else if (type == "character") "string"
-  else stop(paste("No GraphML data type for R type:", type))
+  else stop("No GraphML data type for R type: ", type)
 }
 
 write_graphml_data_value <- function(x) {
@@ -272,7 +272,7 @@ write_graphml_data_value <- function(x) {
   else if (type == "integer" || type == "double" || type == "character")
     toString(x)
   else
-    stop(paste("No GraphML data type for R type:", type))
+    stop("No GraphML data type for R type: ", type)
 }
 
 xml_required_attr <- function(x, attr) {

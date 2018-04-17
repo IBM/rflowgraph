@@ -22,7 +22,7 @@ as_dict.list <- function(x) {
 
 `[[.dict` <- function(d, k) {
   if (!has_key(d, k))
-    stop(paste("missing key:", k))
+    stop("missing key: ", k)
   get(k, envir=d)
 }
 

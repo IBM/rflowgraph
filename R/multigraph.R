@@ -64,7 +64,7 @@ has_edge.multigraph <- function(g, src, tgt) has_key(g$succ[[src]], tgt)
 
 add_node.multigraph <- function(g, n, data=list()) {
   if (has_key(g$nodes, n))
-    stop(paste("node already exists:", n))
+    stop("node already exists: ", n)
   g$nodes[[n]] = data
   g$succ[[n]] = ordered_dict()
   g$pred[[n]] = ordered_dict()
@@ -96,7 +96,7 @@ rem_edge.multigraph <- function(g, src, tgt, ind) {
   if (missing(ind))
     ind = length(edges)
   if (!(1 <= ind && ind <= length(edges)))
-    stop(paste("missing edge", ind))
+    stop("missing edge ", ind)
   edges = edges[-ind]
   if (is_empty(edges)) {
     del(g$succ[[src]], tgt)
