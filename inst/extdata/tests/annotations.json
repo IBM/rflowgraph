@@ -18,5 +18,25 @@
     "class": "numeric",
     "system": "S3",
     "definition": "number"
+  },
+  {
+    "schema": "annotation",
+    "language": "r",
+    "package": "stats",
+    "id": "lm",
+    "kind": "object",
+    "class": "lm",
+    "system": "S3",
+    "definition": "linear-model"
+  },
+  {
+    "schema": "annotation",
+    "language": "r",
+    "package": "stats",
+    "id": "glm",
+    "kind": "object",
+    "class": "glm",
+    "system": "S3",
+    "definition": "generalized-linear-model"
   }
 ]
