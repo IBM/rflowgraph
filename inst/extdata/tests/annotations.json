@@ -38,5 +38,13 @@
     "class": "glm",
     "system": "S3",
     "definition": "generalized-linear-model"
+  },
+    {
+    "schema": "annotation",
+    "language": "r",
+    "package": "stats",
+    "id": "lm-fit",
+    "kind": "morphism",
+    "function": "lm"
   }
 ]

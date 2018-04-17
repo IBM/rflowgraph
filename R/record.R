@@ -9,8 +9,9 @@ record_deref <- function(x, context=NULL) {
 record_call <- function(x, context=NULL) {
   expr = substitute(x)
   stopifnot(is.call(expr))
-  cat("Begin call", call_name(expr), "at", paste(context,collapse=","), "\n")
+  name = rlang::call_name(expr)
+  cat("Begin call", name, "at", paste(context,collapse=","), "\n")
   x
-  cat("End call", call_name(expr), "\n")
+  cat("End call", name, "\n")
   return(x)
 }
