@@ -19,11 +19,11 @@ annotator <- R6Class("annotator",
           loaded[[package]] = FALSE
       }
     },
-    annotate_call = function(call) {
+    annotate_call = function(call, env=rlang::caller_env()) {
       stopifnot(rlang::is_call(call))
       switch(rlang::lang_type_of(call),
         named = {
-          package = fun_package(rlang::call_fn(call))
+          package = fun_package(rlang::call_fn(call, env=env))
           name = rlang::call_name(call)
         },
         namespaced = {
