@@ -13,7 +13,7 @@ test_that("annotations are loaded from a local file", {
   expect_true("integer" %in% base_tbl$class)
   expect_true("numeric" %in% base_tbl$class)
   
-  note = db$annotation("base/integer")
+  note = db$annotation("r/base/integer")
   expect_equal(note$class, "integer")
 })
 
@@ -27,7 +27,7 @@ test_that("annotations are loaded from the remote DB", {
   expect_false("sklearn" %in% packages)
   
   db$load_package("base")
-  note = db$annotation("base/data-frame")
+  note = db$annotation("r/base/data-frame")
   expect_equal(note$class, "data.frame")
   
   base_tbl = db$tbl() %>% filter(package=="base") %>% collect

@@ -1,5 +1,6 @@
 [
   {
+    "_id": "annotation/r/base/integer",
     "schema": "annotation",
     "language": "r",
     "package": "base",
@@ -10,6 +11,7 @@
     "definition": "number"
   },
   {
+    "_id": "annotation/r/base/numeric",
     "schema": "annotation",
     "language": "r",
     "package": "base",
@@ -20,6 +22,7 @@
     "definition": "number"
   },
   {
+    "_id": "annotation/r/stats/lm",
     "schema": "annotation",
     "language": "r",
     "package": "stats",
@@ -30,6 +33,7 @@
     "definition": "linear-model"
   },
   {
+    "_id": "annotation/r/stats/glm",
     "schema": "annotation",
     "language": "r",
     "package": "stats",
@@ -39,7 +43,8 @@
     "system": "S3",
     "definition": "generalized-linear-model"
   },
-    {
+  {
+    "_id": "annotation/r/stats/lm-fit",
     "schema": "annotation",
     "language": "r",
     "package": "stats",

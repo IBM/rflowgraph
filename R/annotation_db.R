@@ -55,7 +55,7 @@ annotation_db <- R6Class("annotation_db",
       optional = c("system", "class", "method", "function")
       df = map_dfr(docs, function(doc) {
         stopifnot(doc$schema == "annotation" && doc$language == "r")
-        key = paste(doc$package, "/", doc$id, sep="")
+        key = paste(doc$language, doc$package, doc$id, sep="/")
         if (has_key(notes, key))
           stop(paste("Annotation already loaded:", key))
         notes[[key]] = doc
