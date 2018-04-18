@@ -16,7 +16,7 @@ Imports:
   jsonlite,
   purrr,
   R6,
-  rlang,
+  rlang (>= 0.2.0),
   RSQLite,
   sofa,
   zeallot

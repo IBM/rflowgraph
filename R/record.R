@@ -5,7 +5,7 @@
 #' @export
 record <- function(expr, env=rlang::caller_env(), db=NULL) {
   expr = substitute(expr)
-  state = record_state$new(db=db)
+  state = record_state$new(env=env, db=db)
   env$`__literal__` = function(...) record_literal(..., state)
   env$`__deref__` = function(...) record_deref(..., state)
   env$`__call__` = function(...) record_call(..., state)
@@ -64,21 +64,31 @@ skip_calls <- c(
 
 record_literal <- function(index, value, state) {
   #cat("Literal", value, "at", index, "\n")
-  node = add_node(state, class(value), list(), list(value=value))
+  
+  # Create nullary node for literal.
+  node = add_node(state, class(value), list(), c("__return__"))
+  
+  # Attach value to node.
   graph_state = state$graph_state()
-  graph_state$call_state()$push_arg(index, value, list(node,1L))
-  value
+  graph_state$call_state()$observe_arg(index, list(node,"__return__"), value)
+  
+  return(value)
 }
 
 record_deref <- function(index, value, state) {
   name = substitute(value)
   stopifnot(is.name(name))
-  #cat("Deref", name, "at", index, "\n")
   
-  graph_state = state$graph_state()
-  origin = get_default(graph_state$output_table, name, list(NULL,NULL))
-  graph_state$call_state()$push_arg(index, value, origin)
+  # Dereference the name.
+  #cat("Deref", name, "at", index, "\n")
   value
+  
+  # Attach value to node in output table, if any.
+  graph_state = state$graph_state()
+  source = get_default(graph_state$output_table, name, list(NULL,NULL))
+  graph_state$call_state()$observe_arg(index, source, value)
+  
+  return(value)
 }
 
 record_call <- function(index, value, state) {
@@ -86,12 +96,34 @@ record_call <- function(index, value, state) {
   stopifnot(is.call(call))
   name = rlang::call_name(call)
 
+  # Evaluate function call.
   graph_state = state$graph_state()
-  call_state = graph_state$push_call()
-  cat("Begin call", name, "at", index, "\n")
+  call_state = graph_state$push_call(call)
+  #cat("Begin call", name, "at", index, "\n")
   value
-  cat("End call", name, "\n")
+  #cat("End call", name, "\n")
   graph_state$pop_call()
+  
+  # Match observed values to arguments.
+  fun = rlang::call_fn(call, env=state$env)
+  observed = call_state$observed_args()
+  names(observed) = rlang::call_args_names(call)
+  matched = fun_args_match(names(fun_args(fun)), observed) %>%
+    discard(rlang::is_missing)
+  
+  # Create call node and edges to observed argument nodes.
+  node = add_node(state, name, names(matched), c("__return__"))
+  iwalk(matched, function(data, port) {
+    c(src_node, src_port) %<-% data$source
+    if (is.null(node)) {
+      # TODO: Add edge to input port of diagram.
+    } else {
+      add_edge(graph_state$graph, src_node, node, src_port, port)
+    }
+  })
+  
+  # Attach call value to node.
+  call_state$observe_arg(index, list(node,"__return__"), value)
   
   return(value)
 }
@@ -109,9 +141,11 @@ add_node.record_state = function(state, name, ...) {
 
 record_state = R6Class("record_state",
   public = list(
+    env = NULL,
     annotator = NULL,
     node_names = NULL,
-    initialize = function(db=NULL) {
+    initialize = function(env, db=NULL) {
+      self$env = env
       self$annotator = annotator$new(db)
       self$node_names = dict()
       private$stack = stack$new()
@@ -136,7 +170,7 @@ graph_state = R6Class("graph_state",
       self$output_table = dict()
       private$stack = stack$new()
     },
-    push_call = function() private$stack$push(call_state$new()),
+    push_call = function(call) private$stack$push(call_state$new(call)),
     pop_call = function() private$stack$pop(),
     call_state = function() private$stack$peek()
   ),
@@ -147,17 +181,19 @@ graph_state = R6Class("graph_state",
 
 call_state = R6Class("call_state",
   public = list(
-    initialize = function() {
-      private$queue = dequer::queue()
+    initialize = function(call) {
+      nargs = length(call) - 1
+      private$args = rep(list(rlang::missing_arg()), nargs)
     },
-    args = function() as.list(private$queue),
-    push_arg = function(index, value, src) {
-      if (is.null(index)) return()
-      dequer::pushback(private$queue, list(index=index, value=value, src=src))
+    observed_args = function() private$args,
+    observe_arg = function(index, source, value) {
+      if (!is.null(index)) {
+        private$args[[index]] = list(source=source, value=value)
+      }
     }
   ),
   private = list(
-    queue = NULL
+    args = NULL
   )
 )
 
