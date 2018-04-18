@@ -203,21 +203,20 @@ write_graphml_graph.wiring_diagram <- function(graph, graphml_keys, xgraph,
   write_graphml_data(graphml_keys, xgraph, graph_data(graph))
   
   # Create node elements.
-  skip_nodes = c(input_node(graph), output_node(graph))
   for (node in nodes(graph)) {
     # TODO: Support nested wiring diagrams.
-    if (node %in% skip_nodes) next
     xnode = xml_add_child(xgraph, "node", id=node)
     write_graphml_data(graphml_keys, xnode, node_data(graph, node))
     write_graphml_ports(graph, graphml_keys, xnode, node)
   }
   
   # Create edge elements.
+  special = c(input_node(graph), output_node(graph))
   for (edge in edges(graph)) {
     c(src, tgt, ind) %<-% unclass(edge)
     xedge = xml_add_child(xgraph, "edge",
-      source = if (src %in% skip_nodes) parent else src,
-      target = if (tgt %in% skip_nodes) parent else tgt,
+      source = if (src %in% special) parent else src,
+      target = if (tgt %in% special) parent else tgt,
       sourceport = source_port(graph, src, tgt, ind),
       targetport = target_port(graph, src, tgt, ind)
     )

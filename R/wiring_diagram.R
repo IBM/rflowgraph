@@ -59,6 +59,12 @@ input_node.wiring_diagram <- function(g) g$input_node
 output_node <- function(g) UseMethod("output_node")
 output_node.wiring_diagram <- function(g) g$output_node
 
+nnodes.wiring_diagram <- function(g) nnodes.multigraph(g) - 2
+nodes.wiring_diagram <- function(g) {
+  skip = c(input_node(g), output_node(g))
+  discard(nodes.multigraph(g), function(n) n %in% skip)
+}
+
 #' @rdname wiring_diagram
 add_node.wiring_diagram <- function(g, node, input_ports=list(),
                                     output_ports=list(), data=list()) {
