@@ -11,6 +11,17 @@ class_system <- function(x) {
     "S3"
 }
 
+#' Get arguments of function
+#' 
+#' @description Get the formal arguments of a function (primitive or closure).
+#' 
+#' @return A named list.
+fun_args <- function(f) {
+  # Use args() for primitive functions: https://stackoverflow.com/q/25978301
+  stopifnot(is.function(f))
+  as.list(formals(if (is.primitive(f)) args(f) else f))
+}
+
 #' Get package of function
 #' 
 #' @description In which package is the function defined?
@@ -20,14 +31,14 @@ class_system <- function(x) {
 #' and methods.
 #' 
 #' @seealso \code{\link{obj_package}}
-fun_package <- function(fun) {
-  stopifnot(is.function(fun))
-  if (is.primitive(fun))
+fun_package <- function(f) {
+  stopifnot(is.function(f))
+  if (is.primitive(f))
     # Special case: primitive functions do not belong to an environment.
     return("base")
   
-  env = environment(fun)
-  if (is(fun, "refMethodDef"))
+  env = environment(f)
+  if (is(f, "refMethodDef"))
     # Special case: class method of R5 class.
     return(attr(env$def, "package"))
   
@@ -61,4 +72,34 @@ obj_package <- function(x) {
   # In general, not possible for R6 classes either:
   # https://github.com/r-lib/R6/issues/144
   attr(class(x), "package")
+}
+
+#' Match arguments of function call
+#' 
+#' @description A reimplementation of R's algorithm for argument matching,
+#' including partial matching.
+fun_args_match <- function(fun_args, call_args) {
+  stopifnot(is.character(fun_args))
+  call_args_names = names2(call_args)
+  
+  # Assign named call arguments using R's partial matching convention.
+  named = call_args_names != ""
+  i = pmatch(call_args_names[named], fun_args)
+  if (any(is.na(i)))
+      stop("Argument match failed: ",
+           "non-matching, multiply partially matching, or duplicate names")
+  
+  # Remove named call arguments, then assign remaining call arguments by order.
+  matched = c(call_args[!named], call_args[named])
+  matched_names = if (is_empty(i))
+    fun_args[seq_along(call_args)]
+  else
+    c(fun_args[-i][seq_along(call_args[!named])], fun_args[i])
+  set_names(matched, matched_names)
+}
+
+#' @rdname fun_args_match
+call_args_match <- function(call, env=rlang::caller_env()) {
+  fun_args_match(names(fun_args(rlang::call_fn(call, env=env))),
+                 rlang::call_args(call))
 }

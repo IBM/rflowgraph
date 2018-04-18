@@ -4,7 +4,7 @@
 \alias{fun_package}
 \title{Get package of function}
 \usage{
-fun_package(fun)
+fun_package(f)
 }
 \description{
 In which package is the function defined?

@@ -15,6 +15,11 @@ test_that("get class system of object", {
   expect_equal(class_system(ordered_dict()), "R6")
 })
 
+test_that("get arguments of function", {
+  expect_equal(names(fun_args(is.function)), "x") # primitive
+  expect_equal(names(fun_args(is.primitive)), "x") # not primitive
+})
+
 test_that("get package of function", {
   expect_equal(fun_package(is.function), "base") # primitive
   expect_equal(fun_package(is.primitive), "base") # not primitive
@@ -33,4 +38,14 @@ test_that("get package of object", {
   expect_equal(obj_package(dict()), NULL)
   expect_equal(obj_package(ExampleClass()), pkg)
   expect_equal(obj_package(ExampleRefClass$new()), pkg)
+})
+
+test_that("match arguments of function call", {
+  matched = list(formula=y~x, data=quote(df))
+  expect_equal(call_args_match(quote(lm(y~x, df))), matched)
+  
+  matched = list(formula=y~x, data=quote(df), method="qr")
+  expect_equal(call_args_match(quote(lm(y~x, df, method="qr"))), matched)
+  expect_equal(call_args_match(quote(lm(y~x, method="qr", df))), matched)
+  expect_equal(call_args_match(quote(lm(data=df, method="qr", y~x))), matched)
 })
