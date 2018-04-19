@@ -29,25 +29,27 @@ record_in_ast <- function(expr, index=NULL) {
   else if (is.pairlist(expr)) {
     # Case 3: Pair lists.
     # Used only for formal arguments of functions. Ignore.
-    return(expr)
+    expr
   }
   else if (is.call(expr)) {
     # Case 4: Function calls.
     name = rlang::call_name(expr)
-    if (name %in% skip_calls) {
-      # Special case 1: Ignore certain calls, like `library`.
-      return(expr)
-    }
-    else if (name == "function") {
-      # Special case 2: User-defined function.
-      stop("Not implemented: recording user functions")
-    }
-    else {
-      # Main case: ordinary function call.
+    if (name %in% SKIP_FUNS) {
+      # Special case: Completely ignore certain calls, like `library`.
+      expr
+    } else {
+      # Recursively transform call arguments.
       args = rlang::call_args(expr)
-      new_args = map2(args, seq_along(args), record_in_ast)
-      new_expr = rlang::call2(name, !!! new_args)
-      return(rlang::call2("__call__", index, new_expr))
+      if (name %in% ASSIGN_FUNS) {
+        # Special case: Variable assignment.
+        stopifnot(length(args) == 2)
+        new_expr = rlang::call2(name, args[[1]], record_in_ast(args[[2]], 1L))
+      } else {
+        # Main case: Recorded function call.
+        new_args = map2(args, seq_along(args), record_in_ast)
+        new_expr = rlang::call2(name, !!! new_args)
+      }
+      rlang::call2("__call__", index, new_expr)
     }
   }
   else {
@@ -55,22 +57,14 @@ record_in_ast <- function(expr, index=NULL) {
          typeof(expr), call.=FALSE)
   }
 }
-skip_calls <- c(
-  "library",
-  "loadNamespace",
-  "require",
-  "requireNamespace"
-)
 
 record_literal <- function(index, value, state) {
-  #cat("Literal", value, "at", index, "\n")
-  
   # Create nullary node for literal.
   node = add_node(state, class(value), list(), c("__return__"))
   
   # Attach value to node.
   graph_state = state$graph_state()
-  graph_state$call_state()$observe_arg(index, list(node,"__return__"), value)
+  graph_state$observe(index, list(node,"__return__"), value)
   
   return(value)
 }
@@ -78,15 +72,15 @@ record_literal <- function(index, value, state) {
 record_deref <- function(index, value, state) {
   name = substitute(value)
   stopifnot(is.name(name))
+  name = as.character(name)
   
   # Dereference the name.
-  #cat("Deref", name, "at", index, "\n")
   value
   
   # Attach value to node in output table, if any.
   graph_state = state$graph_state()
   source = get_default(graph_state$output_table, name, list(NULL,NULL))
-  graph_state$call_state()$observe_arg(index, source, value)
+  graph_state$observe(index, source, value)
   
   return(value)
 }
@@ -95,35 +89,54 @@ record_call <- function(index, value, state) {
   call = substitute(value)
   stopifnot(is.call(call))
   name = rlang::call_name(call)
+  if (is.null(name))
+    stop("Not implemented: recording methods")
+  else if (name == "function")
+    stop("Not implemented: recording user functions")
 
   # Evaluate function call.
   graph_state = state$graph_state()
-  call_state = graph_state$push_call(call)
-  #cat("Begin call", name, "at", index, "\n")
-  value
-  #cat("End call", name, "\n")
-  graph_state$pop_call()
-  
-  # Match observed values to arguments.
-  fun = rlang::call_fn(call, env=state$env)
+  graph_state$push_call(call)
+  value # Evaluate!
+  call_state = graph_state$pop_call()
   observed = call_state$observed_args()
-  names(observed) = rlang::call_args_names(call)
-  matched = fun_args_match(names(fun_args(fun)), observed) %>%
-    discard(rlang::is_missing)
   
-  # Create call node and edges to observed argument nodes.
-  node = add_node(state, name, names(matched), c("__return__"))
-  iwalk(matched, function(data, port) {
-    c(src_node, src_port) %<-% data$source
-    if (is.null(node)) {
-      # TODO: Add edge to input port of diagram.
-    } else {
-      add_edge(graph_state$graph, src_node, node, src_port, port)
-    }
-  })
+  # Create or retrieve node for call.
+  if (name == "(" || name == "{") {
+    # Special case: Don't create nodes for parentheses and braces,
+    # which are represented as calls in R.
+    # FIXME: This won't handle control flow changes through return().
+    c(node, out_port) %<-% dplyr::last(observed)$source
+  }
+  else if (name %in% ASSIGN_FUNS) {
+    # Special case: Don't create nodes for assignments, but do update the
+    # output table.
+    c(node, out_port) %<-% observed[[1]]$source
+    varname = as.character(call[[2]])
+    graph_state$output_table[[varname]] = list(node,out_port)
+  }
+  else {
+    # Match observed values to arguments.
+    fun = rlang::call_fn(call, env=state$env)
+    names(observed) = rlang::call_args_names(call)
+    matched = fun_args_match(names(fun_args(fun)), observed) %>%
+      discard(rlang::is_missing)
+    
+    # Create call node and edges to observed argument nodes.
+    out_port = "__return__"
+    node = add_node(state, name, names(matched), out_port)
+    iwalk(matched, function(data, port) {
+      c(src_node, src_port) %<-% data$source
+      if (is.null(node)) {
+        # TODO: Add edge to input port of diagram.
+      } else {
+        add_edge(graph_state$graph, src_node, node, src_port, port)
+      }
+    })
+  }
   
   # Attach call value to node.
-  call_state$observe_arg(index, list(node,"__return__"), value)
+  graph_state$observe(index, list(node,out_port), value)
   
   return(value)
 }
@@ -172,7 +185,12 @@ graph_state = R6Class("graph_state",
     },
     push_call = function(call) private$stack$push(call_state$new(call)),
     pop_call = function() private$stack$pop(),
-    call_state = function() private$stack$peek()
+    call_state = function() private$stack$peek(),
+    observe = function(...) {
+      call_state = self$call_state()
+      if (!is.null(call_state))
+        call_state$observe_arg(...)
+    }
   ),
   private = list(
     stack = NULL
@@ -187,9 +205,7 @@ call_state = R6Class("call_state",
     },
     observed_args = function() private$args,
     observe_arg = function(index, source, value) {
-      if (!is.null(index)) {
-        private$args[[index]] = list(source=source, value=value)
-      }
+      private$args[[index]] = list(source=source, value=value)
     }
   ),
   private = list(
@@ -224,4 +240,18 @@ stack = R6Class("stack",
     current = NULL,
     stack = NULL
   )
+)
+
+# Constants
+
+ASSIGN_FUNS <- c(
+  "<-",
+  "<<-",
+  "="
+)
+SKIP_FUNS <- c(
+  "library",
+  "loadNamespace",
+  "require",
+  "requireNamespace"
 )
