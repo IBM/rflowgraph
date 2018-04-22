@@ -102,14 +102,20 @@ fun_args_match <- function(fun_args, call_args) {
   if (any(is.na(i)))
       stop("Argument match failed: ",
            "non-matching, multiply partially matching, or duplicate names")
+  fun_args_named = fun_args[i]
+  fun_args = if (is_empty(i)) fun_args else fun_args[-i]
   
-  # Remove named call arguments, then assign remaining call arguments by order.
+  # Assign unnamed call arguments, taking ellipsis into account.
+  n_unnamed = sum(!named)
+  i = seq2(1, n_unnamed)
+  ell = match("...", fun_args)
+  if (!is.na(ell))
+    # ellipsis absorbs all following unnamed call arguments.
+    i[seq2(ell, n_unnamed)] = ell
+  fun_args_unnamed = fun_args[i]
+  
   matched = c(call_args[!named], call_args[named])
-  matched_names = if (is_empty(i))
-    fun_args[seq_along(call_args)]
-  else
-    c(fun_args[-i][seq_along(call_args[!named])], fun_args[i])
-  set_names(matched, matched_names)
+  set_names(matched, c(fun_args_unnamed, fun_args_named))
 }
 
 #' @rdname fun_args_match
