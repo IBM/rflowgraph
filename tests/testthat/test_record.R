@@ -16,6 +16,13 @@ context("record")
 
 ret = "__return__"
 
+test_that("record literal values", {
+  g = wiring_diagram()
+  add_node(g, "numeric:1", list(), ret)
+  h = record(1)
+  expect_equal(h, g)
+})
+
 test_that("record trivial arithemetic expression", {
   g = wiring_diagram()
   add_node(g, "numeric:1", list(), ret)
