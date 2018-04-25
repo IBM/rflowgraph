@@ -19,8 +19,11 @@ ret = "__return__"
 test_that("record literal values", {
   g = wiring_diagram()
   add_node(g, "numeric:1", list(), ret)
-  h = record(1)
-  expect_equal(h, g)
+  expect_equal(record(1), g)
+  
+  g = wiring_diagram()
+  add_node(g, "formula:1", list(), ret)
+  expect_equal(record(y~x-1), g)
 })
 
 test_that("record trivial arithemetic expression", {

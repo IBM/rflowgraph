@@ -95,11 +95,16 @@ record_call <- function(call, state, index=NULL) {
   pkg = fun_package(fun)
   full_name = paste(pkg, name, sep="::")
   
-  # Bail out of recording in certain special cases.
+  # Short circuit call recording in special cases.
   if (full_name %in% NO_RECORD_FUNS) {
     # Special case: completely ignore certain calls, like `library`.
     return(state$eval(call))
-  } else if (full_name == "base::function") {
+  }
+  else if (full_name %in% LITERAL_FUNS) {
+    # Special case: treat certain calls, like formulas, as literals.
+    return(record_literal(state$eval(call), state, index))
+  }
+  else if (full_name == "base::function") {
     # Special case: function definition.
     stop("Not implemented: recording user functions")
   }
@@ -270,6 +275,12 @@ ASSIGN_FUNS <- c(
   "base::<-",
   "base::<<-",
   "base::="
+)
+LITERAL_FUNS <- c(
+  "base::quote",
+  "base::~",
+  "rlang::quo",
+  "rlang::expr"
 )
 NO_RECORD_FUNS <- c(
   "base::library",
