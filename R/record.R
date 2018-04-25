@@ -17,54 +17,42 @@
 #' @description Record the evaluation of an R expression as a flow graph.
 #' 
 #' @export
-record <- function(expr, env=rlang::caller_env(), db=NULL) {
-  expr = substitute(expr)
+record <- function(x, env=rlang::caller_env(), db=NULL) {
+  expr = substitute(x)
   state = record_state$new(env=env, db=db)
-  env$`__literal__` = function(...) record_literal(..., state)
-  env$`__deref__` = function(...) record_deref(..., state)
-  env$`__call__` = function(...) record_call(..., state)
+  env$`__record__` = function(...) record_(..., state=state)
   tryCatch({
-    eval(record_in_ast(expr), envir=env)
+    state$eval(transform_ast(expr))
   }, finally={
-    rm(`__literal__`, `__deref__`, `__call__`, envir=env)
+    rm(`__record__`, envir=env)
   })
   state$graph()
 }
 
-record_in_ast <- function(expr, index=NULL) {
+transform_ast <- function(expr, index=NULL) {
+  if (is.null(index))
+    rlang::call2("__record__", expr)
+  else
+    rlang::call2("__record__", expr, index)
+}
+
+record_ <- function(x, state, index=NULL) {
+  expr = substitute(x)
   if (is.atomic(expr)) {
     # Case 1: Literal values.
-    rlang::call2("__literal__", index, expr)
+    record_literal(expr, state, index)
   }
   else if (is.name(expr)) {
-    # Case 2: Names.
-    rlang::call2("__deref__", index, expr)
+    # Case 2. Names.
+    record_name(expr, state, index)
   }
   else if (is.pairlist(expr)) {
     # Case 3: Pair lists.
     # Used only for formal arguments of functions. Ignore.
-    expr
-  }
-  else if (is.call(expr)) {
+    x
+  } else if (is.call(expr)) {
     # Case 4: Function calls.
-    name = rlang::call_name(expr)
-    if (name %in% SKIP_FUNS) {
-      # Special case: Completely ignore certain calls, like `library`.
-      expr
-    } else {
-      # Recursively transform call arguments.
-      args = rlang::call_args(expr)
-      if (name %in% ASSIGN_FUNS) {
-        # Special case: Variable assignment.
-        stopifnot(length(args) == 2)
-        new_expr = rlang::call2(name, args[[1]], record_in_ast(args[[2]], 1L))
-      } else {
-        # Main case: Recorded function call.
-        new_args = map2(args, seq_along(args), record_in_ast)
-        new_expr = rlang::call2(name, !!! new_args)
-      }
-      rlang::call2("__call__", index, new_expr)
-    }
+    record_call(expr, state, index)
   }
   else {
     stop("AST transform: don't know how to handle type ",
@@ -72,7 +60,7 @@ record_in_ast <- function(expr, index=NULL) {
   }
 }
 
-record_literal <- function(index, value, state) {
+record_literal <- function(value, state, index=NULL) {
   # Create nullary node for literal.
   node = add_node(state, class(value), list(), c("__return__"))
   
@@ -83,15 +71,13 @@ record_literal <- function(index, value, state) {
   return(value)
 }
 
-record_deref <- function(index, value, state) {
-  name = substitute(value)
+record_name <- function(name, state, index=NULL) {
+  # Dereference the name.
   stopifnot(is.name(name))
+  value = state$eval(name)
   name = as.character(name)
   
-  # Dereference the name.
-  value
-  
-  # Attach value to node in output table, if any.
+  # Attach value to corresponding node in output table, if any.
   graph_state = state$graph_state()
   source = get_default(graph_state$output_table, name, list(NULL,NULL))
   graph_state$observe(index, source, value)
@@ -99,19 +85,41 @@ record_deref <- function(index, value, state) {
   return(value)
 }
 
-record_call <- function(index, value, state) {
-  call = substitute(value)
+record_call <- function(call, state, index=NULL) {
+  # Get name and package of function.
   stopifnot(is.call(call))
   name = rlang::call_name(call)
   if (is.null(name))
     stop("Not implemented: recording methods")
-  else if (name == "function")
+  fun = rlang::call_fn(call, env=state$env)
+  pkg = fun_package(fun)
+  full_name = paste(pkg, name, sep="::")
+  
+  # Bail out of recording in certain special cases.
+  if (full_name %in% NO_RECORD_FUNS) {
+    # Special case: completely ignore certain calls, like `library`.
+    return(state$eval(call))
+  } else if (full_name == "base::function") {
+    # Special case: function definition.
     stop("Not implemented: recording user functions")
+  }
+  
+  # Transform call arguments.
+  args = rlang::call_args(call)
+  new_call = if (full_name %in% ASSIGN_FUNS) {
+    # Special case: Variable assignment.
+    stopifnot(length(args) == 2)
+    rlang::call2(name, args[[1]], transform_ast(args[[2]], 1L))
+  } else {
+    # Main case: Recorded function call.
+    new_args = map2(args, seq_along(args), transform_ast)
+    rlang::call2(name, !!! new_args)
+  }
 
   # Evaluate function call.
   graph_state = state$graph_state()
-  graph_state$push_call(call)
-  value # Evaluate!
+  graph_state$push_call(new_call)
+  value = state$eval(new_call) # Evaluate!
   call_state = graph_state$pop_call()
   observed = call_state$observed_args()
   
@@ -122,7 +130,7 @@ record_call <- function(index, value, state) {
     # FIXME: This won't handle control flow changes through return().
     c(node, out_port) %<-% dplyr::last(observed)$source
   }
-  else if (name %in% ASSIGN_FUNS) {
+  else if (full_name %in% ASSIGN_FUNS) {
     # Special case: Don't create nodes for assignments, but do update the
     # output table.
     c(node, out_port) %<-% observed[[1]]$source
@@ -131,7 +139,6 @@ record_call <- function(index, value, state) {
   }
   else {
     # Match observed values to arguments.
-    fun = rlang::call_fn(call, env=state$env)
     names(observed) = rlang::call_args_names(call)
     matched = fun_args_match(names(fun_args(fun)), observed) %>%
       discard(rlang::is_missing)
@@ -178,6 +185,7 @@ record_state = R6Class("record_state",
       private$stack = stack$new()
       self$push_graph()
     },
+    eval = function(...) eval(..., envir=self$env),
     push_graph = function() private$stack$push(graph_state$new()),
     pop_graph = function() private$stack$pop(),
     graph_state = function() private$stack$peek(),
@@ -259,13 +267,13 @@ stack = R6Class("stack",
 # Constants
 
 ASSIGN_FUNS <- c(
-  "<-",
-  "<<-",
-  "="
+  "base::<-",
+  "base::<<-",
+  "base::="
 )
-SKIP_FUNS <- c(
-  "library",
-  "loadNamespace",
-  "require",
-  "requireNamespace"
+NO_RECORD_FUNS <- c(
+  "base::library",
+  "base::loadNamespace",
+  "base::require",
+  "base::requireNamespace"
 )
