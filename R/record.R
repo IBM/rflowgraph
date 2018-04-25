@@ -17,9 +17,9 @@
 #' @description Record the evaluation of an R expression as a flow graph.
 #' 
 #' @export
-record <- function(x, env=rlang::caller_env(), db=NULL) {
+record <- function(x, env=rlang::caller_env()) {
   expr = substitute(x)
-  state = record_state$new(env=env, db=db)
+  state = record_state$new(env=env)
   env$`__record__` = function(...) record_(..., state=state)
   tryCatch({
     state$eval(transform_ast(expr))
@@ -181,11 +181,9 @@ add_node.record_state = function(state, name, ...) {
 record_state = R6Class("record_state",
   public = list(
     env = NULL,
-    annotator = NULL,
     node_names = NULL,
     initialize = function(env, db=NULL) {
       self$env = env
-      self$annotator = annotator$new(db)
       self$node_names = dict()
       private$stack = stack$new()
       self$push_graph()
