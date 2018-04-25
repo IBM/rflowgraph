@@ -4,7 +4,7 @@
 \alias{record}
 \title{Record as flow graph}
 \usage{
-record(expr, env = rlang::caller_env(), db = NULL)
+record(x, env = rlang::caller_env())
 }
 \description{
 Record the evaluation of an R expression as a flow graph.

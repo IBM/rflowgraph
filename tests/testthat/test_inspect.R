@@ -71,3 +71,10 @@ test_that("match arguments with ellipsis in function definition", {
   expect_equal(call_args_match(quote(data(list=c("iris", "iris3")))),
                list(list=quote(c("iris", "iris3"))))
 })
+
+test_that("get information about function call", {
+  expect_equal(call_info(quote(lm(y~x, df))),
+               list(name="lm", package="stats"))
+  expect_equal(call_info(quote(stats::lm(y~x, df))),
+               list(name="lm", package="stats"))
+})

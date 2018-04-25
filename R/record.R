@@ -86,20 +86,11 @@ record_name <- function(name, state, index=NULL) {
 }
 
 record_call <- function(call, state, index=NULL) {
-  # Get name and package of function.
-  stopifnot(is.call(call))
-  fun = rlang::call_fn(call, env=state$env)
-  head = call[[1]]
-  rlang::switch_lang(call, named = {
-    pkg = fun_package(fun)
-    name = as.character(head)
-  }, namespaced = {
-    pkg = as.character(head[[1]]) # == fun_package(fun)
-    name = as.character(head[[3]])
-  }, recursive = {
-    stop("Not implemented: recording methods")
-  })
-  full_name = paste(pkg, name, sep="::")
+  # Get information about function: name, package, etc.
+  fun = rlang::call_fn(call, state$env)
+  info = call_info(call, fun=fun)
+  name = info$name
+  full_name = paste(info$package, name, sep="::")
   
   # Special cases: short circuit recording of call.
   if (full_name %in% NO_RECORD_FUNS) {

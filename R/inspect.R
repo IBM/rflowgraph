@@ -123,3 +123,25 @@ call_args_match <- function(call, env=rlang::caller_env()) {
   fun_args_match(names(fun_args(rlang::call_fn(call, env=env))),
                  rlang::call_args(call))
 }
+
+#' Get information about function call
+#' 
+#' @description A one-stop shop for information about a function being called,
+#' supporting functions (closures and primitives) and methods (S3, S4, R5, R6).
+call_info <- function(call, env=rlang::caller_env(), fun=NULL) {
+  stopifnot(is.call(call))
+  if (is.null(fun))
+    fun = rlang::call_fn(call, env)
+  
+  head = call[[1]]
+  rlang::switch_lang(call, named = {
+    pkg = fun_package(fun)
+    name = as.character(head)
+  }, namespaced = {
+    pkg = as.character(head[[2]]) # == fun_package(fun)
+    name = as.character(head[[3]])
+  }, recursive = {
+    stop("Not implemented: method calls")
+  })
+  list(name=name, package=pkg)
+}
