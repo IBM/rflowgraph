@@ -60,3 +60,12 @@ test_that("record parenthesized arithmetic expression", {
   h = record(2*(1+1))
   expect_equal(h, g)
 })
+
+test_that("record namespaced calls", {
+  g = wiring_diagram()
+  add_node(g, "numeric:1", list(), ret)
+  add_node(g, "exp:1", "x", ret)
+  add_edge(g, "numeric:1", "exp:1", ret, "x")
+  expect_equal(record(exp(1)), g)
+  expect_equal(record(base::exp(1)), g)
+})

@@ -88,25 +88,31 @@ record_name <- function(name, state, index=NULL) {
 record_call <- function(call, state, index=NULL) {
   # Get name and package of function.
   stopifnot(is.call(call))
-  name = rlang::call_name(call)
-  if (is.null(name))
-    stop("Not implemented: recording methods")
   fun = rlang::call_fn(call, env=state$env)
-  pkg = fun_package(fun)
+  head = call[[1]]
+  rlang::switch_lang(call, named = {
+    pkg = fun_package(fun)
+    name = as.character(head)
+  }, namespaced = {
+    pkg = as.character(head[[1]]) # == fun_package(fun)
+    name = as.character(head[[3]])
+  }, recursive = {
+    stop("Not implemented: recording methods")
+  })
   full_name = paste(pkg, name, sep="::")
   
-  # Short circuit call recording in special cases.
+  # Special cases: short circuit recording of call.
   if (full_name %in% NO_RECORD_FUNS) {
-    # Special case: completely ignore certain calls, like `library`.
+    # Completely ignore certain calls, like `library`.
     return(state$eval(call))
   }
   else if (full_name %in% LITERAL_FUNS) {
-    # Special case: treat certain calls, like formulas, as literals.
+    # Treat certain calls, like formulas, as literals.
     return(record_literal(state$eval(call), state, index))
   }
   else if (full_name == "base::function") {
-    # Special case: function definition.
-    stop("Not implemented: recording user functions")
+    # Function definition.
+    stop("Not implemented: recording function definition")
   }
   
   # Transform call arguments.
