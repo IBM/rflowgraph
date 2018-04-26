@@ -14,6 +14,3 @@ This function reliably determines the definining package of a
 function object, including for primitive functions, anonymous functions,
 and methods.
 }
-\seealso{
-\code{\link{obj_package}}
-}

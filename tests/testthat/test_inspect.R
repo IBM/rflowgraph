@@ -61,13 +61,6 @@ test_that("get package of function", {
   expect_equal(fun_package(ExampleRefClass$new), pkg)
 })
 
-test_that("get package of object", {
-  pkg = packageName()
-  expect_equal(obj_package(dict()), NULL)
-  expect_equal(obj_package(ExampleClass()), pkg)
-  expect_equal(obj_package(ExampleRefClass$new()), pkg)
-})
-
 test_that("match arguments of function call", {
   matched = list(formula=y~x, data=quote(df))
   expect_equal(call_args_match(quote(lm(y~x, df))), matched)

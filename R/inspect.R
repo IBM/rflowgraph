@@ -64,8 +64,6 @@ fun_args <- function(f) {
 #' @details This function reliably determines the definining package of a
 #' function object, including for primitive functions, anonymous functions,
 #' and methods.
-#' 
-#' @seealso \code{\link{obj_package}}
 fun_package <- function(f) {
   stopifnot(is.function(f))
   if (is.primitive(f))
@@ -88,25 +86,6 @@ fun_package <- function(f) {
     env = parent.env(env)
   }
   name
-}
-
-#' Get package of object
-#' 
-#' @description In which package is the object's class defined?
-#' 
-#' @details This function tries to determine the defining package of the
-#' object's class. In general, this is not possible because R has an informal
-#' class system.
-#' 
-#' Currently, this function works reliably on S4 and R5 instances, but not on
-#' S3 or R6 instances. When it fails, it returns \code{NULL}.
-#' 
-#' @seealso \code{\link{fun_package}}
-obj_package <- function(x) {
-  # Obviously not possible for S3 classes, which are completely informal.
-  # In general, not possible for R6 classes either:
-  # https://github.com/r-lib/R6/issues/144
-  attr(class(x), "package")
 }
 
 #' Match arguments of function call
