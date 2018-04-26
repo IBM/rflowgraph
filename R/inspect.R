@@ -12,17 +12,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#' Class system of object
+#' Class system
 #' 
-#' @description Which class system does the object use?
-#' @return Returns one of "S3", "S4", "R5", "R6".
+#' @description Which class system does the object or function use?
+#' 
+#' @return Returns one of "S3", "S4", "R5", "R6", or, in the case of functions,
+#' possibly \code{NULL}.
 class_system <- function(x) {
-  if (is.R6(x))
-    "R6"
-  else if (isS4(x))
-    tryCatch({ x$getRefClass; "R5"}, error=function(e) "S4")
-  else
-    "S3"
+  if (is.function(x)) {
+    if (is.primitive(x))
+      NULL
+    else if (is.R6(environment(x)$self))
+      "R6"
+    else if (is(x, "refMethodDef"))
+      "R5"
+    else if (is(x, "standardGeneric") || is(x, "nonstandardGenericFunction"))
+      "S4"
+    else if (isS3stdGeneric(x))
+      # XXX: Doesn't handle S3 methods. However, isS3method() operates on
+      # function names, not functions, and is in any case terribly hackish.
+      "S3"
+    else
+      NULL
+  } else {
+    if (is.R6(x))
+      "R6"
+    else if (!isS4(x))
+      "S3"
+    else if (is(x, "refClass"))
+      "R5"
+    else
+      "S4"
+  }
 }
 
 #' Get arguments of function

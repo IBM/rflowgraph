@@ -15,7 +15,9 @@
 context("inspect")
 
 ExampleClass = setClass("ExampleClass", representation(name="character"))
-ExampleRefClass = setRefClass("ExampleRefClass")
+ExampleRefClass = setRefClass("ExampleRefClass", methods=list(
+  method = function() TRUE
+))
 
 test_that("get class system of object", {
   expect_equal(class_system(1), "S3")
@@ -27,6 +29,18 @@ test_that("get class system of object", {
   
   expect_equal(class_system(dict()), "S3")
   expect_equal(class_system(ordered_dict()), "R6")
+})
+
+test_that("get class system of function", {
+  expect_equal(class_system(is.function), NULL) # primitive
+  expect_equal(class_system(is.primitive), NULL) # not primitive
+  
+  expect_equal(class_system(graphics::plot), "S3")
+  expect_equal(class_system(stats4::plot), "S4")
+  x = ExampleRefClass()
+  expect_equal(class_system(x$method), "R5")
+  d = ordered_dict()
+  expect_equal(class_system(d$length), "R6")
 })
 
 test_that("get arguments of function", {

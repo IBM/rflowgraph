@@ -2,13 +2,14 @@
 % Please edit documentation in R/inspect.R
 \name{class_system}
 \alias{class_system}
-\title{Class system of object}
+\title{Class system}
 \usage{
 class_system(x)
 }
 \value{
-Returns one of "S3", "S4", "R5", "R6".
+Returns one of "S3", "S4", "R5", "R6", or, in the case of functions,
+possibly \code{NULL}.
 }
 \description{
-Which class system does the object use?
+Which class system does the object or function use?
 }
