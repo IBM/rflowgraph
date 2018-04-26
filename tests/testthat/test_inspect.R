@@ -80,8 +80,10 @@ test_that("match arguments with ellipsis in function definition", {
 })
 
 test_that("get information about function call", {
-  expect_equal(call_info(quote(lm(y~x, df))),
-               list(name="lm", package="stats"))
-  expect_equal(call_info(quote(stats::lm(y~x, df))),
-               list(name="lm", package="stats"))
+  lm_info = list(name="lm", package="stats")
+  expect_equal(call_info(quote(lm(y~x, df))), lm_info)
+  expect_equal(call_info(quote(stats::lm(y~x, df))), lm_info)
+  
+  plot_info = list(name="plot", package="graphics", class_system="S3")
+  expect_equal(call_info(quote(plot(x,y))), plot_info)
 })

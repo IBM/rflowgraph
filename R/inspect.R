@@ -143,5 +143,7 @@ call_info <- function(call, env=rlang::caller_env(), fun=NULL) {
   }, recursive = {
     stop("Not implemented: method calls")
   })
-  list(name=name, package=pkg)
+  system = class_system(fun)
+  list(name=name, package=pkg, class_system=system) %>%
+    discard(is.null)
 }
