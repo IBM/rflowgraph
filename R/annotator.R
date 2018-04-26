@@ -34,18 +34,8 @@ annotator <- R6Class("annotator",
       }
     },
     annotate_call = function(call, env=rlang::caller_env()) {
-      stopifnot(rlang::is_call(call))
-      switch(rlang::lang_type_of(call),
-        named = {
-          package = fun_package(rlang::call_fn(call, env=env))
-          name = rlang::call_name(call)
-        },
-        namespaced = {
-          c(package, name) %<-% map(rlang::call_args(call[[1]]), as.character)
-        },
-        stop("Only named or namespaced calls can be annotated")
-      )
-      self$annotate_function(name, package)
+      info = call_info(call, env)
+      self$annotate_function(info$name, info$package)
     },
     annotate_function = function(name, package) {
       # Load annotations for package, if not already loaded.
