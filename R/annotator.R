@@ -54,6 +54,18 @@ annotator <- R6Class("annotator",
       }
     },
     annotate_object = function(x) {
+      # Ideally, we would filter by package but it's generally not possible
+      # to determine the package where an R class is defined, because R has
+      # an informal class system.
+      #
+      # It's certainly not possible for S3, which is completely informal.
+      # Apparently, it's not possible for R6 either, though for no good reason:
+      # https://github.com/r-lib/R6/issues/144
+      #
+      # It is possible for S4 and R5 via the prescription
+      #   attr(class(x), "package")
+      # but the benefit of handling this case seems marginal, given how rare
+      # S4 classes are in practice.
       self$annotate_type(class(x), class_system(x))
     },
     annotate_type = function(classes, system="S3") {
