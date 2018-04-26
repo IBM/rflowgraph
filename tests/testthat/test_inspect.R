@@ -84,6 +84,6 @@ test_that("get information about function call", {
   expect_equal(call_info(quote(lm(y~x, df))), lm_info)
   expect_equal(call_info(quote(stats::lm(y~x, df))), lm_info)
   
-  plot_info = list(name="plot", package="graphics", class_system="S3")
+  plot_info = list(name="plot", package="graphics", system="S3")
   expect_equal(call_info(quote(plot(x,y))), plot_info)
 })

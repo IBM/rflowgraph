@@ -4,7 +4,17 @@
 \alias{record}
 \title{Record as flow graph}
 \usage{
-record(x, env = rlang::caller_env())
+record(x, env = rlang::caller_env(), node_data = FALSE)
+}
+\arguments{
+\item{x}{(unevaluated) expression to evaluate and record}
+
+\item{env}{evaluation environment}
+
+\item{node_data}{whether to store function information as node data}
+}
+\value{
+A flow graph, of class \code{wiring_diagram}, for the evaluation.
 }
 \description{
 Record the evaluation of an R expression as a flow graph.

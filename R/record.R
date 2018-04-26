@@ -16,10 +16,16 @@
 #' 
 #' @description Record the evaluation of an R expression as a flow graph.
 #' 
+#' @param x (unevaluated) expression to evaluate and record
+#' @param env evaluation environment
+#' @param node_data whether to store function information as node data
+#' 
+#' @return A flow graph, of class \code{wiring_diagram}, for the evaluation.
+#' 
 #' @export
-record <- function(x, env=rlang::caller_env()) {
+record <- function(x, env=rlang::caller_env(), node_data=FALSE) {
   expr = substitute(x)
-  state = record_state$new(env=env)
+  state = record_state$new(list(env=env, node_data=node_data))
   env$`__record__` = function(...) record_(..., state=state)
   tryCatch({
     state$eval(transform_ast(expr))
@@ -30,10 +36,7 @@ record <- function(x, env=rlang::caller_env()) {
 }
 
 transform_ast <- function(expr, index=NULL) {
-  if (is.null(index))
-    rlang::call2("__record__", expr)
-  else
-    rlang::call2("__record__", expr, index)
+  rlang::call2("__record__", !!! compact(list(expr, index)))
 }
 
 record_ <- function(x, state, index=NULL) {
@@ -62,7 +65,8 @@ record_ <- function(x, state, index=NULL) {
 
 record_literal <- function(value, state, index=NULL) {
   # Create nullary node for literal.
-  node = add_node(state, class(value), list(), c("__return__"))
+  node = add_node(state, class(value), list(), c("__return__"),
+                  if (state$options$node_data) list(kind="literal") else list())
   
   # Attach value to node.
   graph_state = state$graph_state()
@@ -87,7 +91,7 @@ record_name <- function(name, state, index=NULL) {
 
 record_call <- function(call, state, index=NULL) {
   # Get information about function: name, package, etc.
-  fun = rlang::call_fn(call, state$env)
+  fun = rlang::call_fn(call, state$options$env)
   info = call_info(call, fun=fun)
   name = info$name
   full_name = paste(info$package, name, sep="::")
@@ -149,7 +153,8 @@ record_call <- function(call, state, index=NULL) {
     ell = names2(matched) == "" # missing names due to ellipsis
     in_ports = ifelse(ell, as.character(cumsum(ell)), names2(matched))
     out_port = "__return__"
-    node = add_node(state, name, in_ports, out_port)
+    node = add_node(state, name, in_ports, out_port,
+                    if (state$options$node_data) info else list())
     map2(matched, in_ports, function(data, port) {
       c(src_node, src_port) %<-% data$source
       if (is.null(node)) {
@@ -179,15 +184,15 @@ add_node.record_state = function(state, name, ...) {
 
 record_state = R6Class("record_state",
   public = list(
-    env = NULL,
+    options = list(),
     node_names = NULL,
-    initialize = function(env, db=NULL) {
-      self$env = env
+    initialize = function(options) {
+      self$options = options
       self$node_names = dict()
       private$stack = stack$new()
       self$push_graph()
     },
-    eval = function(...) eval(..., envir=self$env),
+    eval = function(...) eval(..., envir=self$options$env),
     push_graph = function() private$stack$push(graph_state$new()),
     pop_graph = function() private$stack$pop(),
     graph_state = function() private$stack$peek(),

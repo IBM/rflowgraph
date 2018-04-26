@@ -146,5 +146,5 @@ call_info <- function(call, env=rlang::caller_env(), fun=NULL) {
     stop("Not implemented: method calls")
   })
   system = class_system(fun)
-  compact(list(name=name, package=pkg, class_system=system))
+  compact(list(name=name, package=pkg, system=system))
 }
