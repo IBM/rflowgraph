@@ -69,3 +69,13 @@ test_that("record namespaced calls", {
   expect_equal(record(exp(1)), g)
   expect_equal(record(base::exp(1)), g)
 })
+
+test_that("record calls with ellipses", {
+  g = wiring_diagram()
+  add_node(g, "numeric:1", list(), ret)
+  add_node(g, "numeric:2", list(), ret)
+  add_node(g, "sum:1", c("1","2"), ret)
+  add_edge(g, "numeric:1", "sum:1", ret, "1")
+  add_edge(g, "numeric:2", "sum:1", ret, "2")
+  expect_equal(record(sum(1,1)), g)
+})

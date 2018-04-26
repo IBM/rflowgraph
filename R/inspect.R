@@ -106,16 +106,18 @@ fun_args_match <- function(fun_args, call_args) {
   fun_args = if (is_empty(i)) fun_args else fun_args[-i]
   
   # Assign unnamed call arguments, taking ellipsis into account.
+  fun_args = dplyr::recode(fun_args, `...`="")
   n_unnamed = sum(!named)
   i = seq2(1, n_unnamed)
-  ell = match("...", fun_args)
+  ell = match("", fun_args)
   if (!is.na(ell))
-    # ellipsis absorbs all following unnamed call arguments.
+    # An ellipsis absorbs all following unnamed call arguments.
     i[seq2(ell, n_unnamed)] = ell
   fun_args_unnamed = fun_args[i]
   
   matched = c(call_args[!named], call_args[named])
-  set_names(matched, c(fun_args_unnamed, fun_args_named))
+  names = c(fun_args_unnamed, fun_args_named)
+  if (all(names == "")) unname(matched) else set_names(matched, names)
 }
 
 #' @rdname fun_args_match
@@ -144,6 +146,5 @@ call_info <- function(call, env=rlang::caller_env(), fun=NULL) {
     stop("Not implemented: method calls")
   })
   system = class_system(fun)
-  list(name=name, package=pkg, class_system=system) %>%
-    discard(is.null)
+  compact(list(name=name, package=pkg, class_system=system))
 }

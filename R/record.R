@@ -144,11 +144,13 @@ record_call <- function(call, state, index=NULL) {
     names(observed) = rlang::call_args_names(call)
     matched = fun_args_match(names(fun_args(fun)), observed) %>%
       discard(rlang::is_missing)
-    
+
     # Create call node and edges to observed argument nodes.
+    ell = names2(matched) == "" # missing names due to ellipsis
+    in_ports = ifelse(ell, as.character(cumsum(ell)), names2(matched))
     out_port = "__return__"
-    node = add_node(state, name, names(matched), out_port)
-    iwalk(matched, function(data, port) {
+    node = add_node(state, name, in_ports, out_port)
+    map2(matched, in_ports, function(data, port) {
       c(src_node, src_port) %<-% data$source
       if (is.null(node)) {
         # TODO: Add edge to input port of diagram.

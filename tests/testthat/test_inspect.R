@@ -72,9 +72,9 @@ test_that("match arguments of function call", {
 })
 
 test_that("match arguments with ellipsis in function definition", {
-  expect_equal(call_args_match(quote(data(iris))), list(`...`=quote(iris)))
+  expect_equal(call_args_match(quote(data(iris))), list(quote(iris)))
   expect_equal(call_args_match(quote(data(iris, iris3))),
-               list(`...`=quote(iris), `...`=quote(iris3)))
+               list(quote(iris), quote(iris3)))
   expect_equal(call_args_match(quote(data(list=c("iris", "iris3")))),
                list(list=quote(c("iris", "iris3"))))
 })
