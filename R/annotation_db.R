@@ -39,13 +39,14 @@ annotation_db <- R6Class("annotation_db",
         kind = character(),
         system = character(),
         class = character(),
-        method = character(),
         `function` = character()
       )
       DBI::dbWriteTable(conn, "annotations", df)
       dplyr::db_create_indexes(conn, "annotations", list(
-        c("kind", "system", "class", "method"),
-        c("kind", "package", "function")
+        # Object annotation index.
+        c("kind", "system", "class"),
+        # Morphism annotation index.
+        c("kind", "package", "function", "system", "class")
       ))
       private$notes = dict()
     },
@@ -66,7 +67,7 @@ annotation_db <- R6Class("annotation_db",
     load_documents = function(docs) {
       notes = private$notes
       required = c("package", "id", "kind")
-      optional = c("system", "class", "method", "function")
+      optional = c("system", "class", "function")
       df = map_dfr(docs, function(doc) {
         stopifnot(doc$schema == "annotation" && doc$language == "r")
         key = paste(doc$language, doc$package, doc$id, sep="/")
