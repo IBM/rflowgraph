@@ -92,9 +92,9 @@ record_name <- function(name, state, index=NULL) {
 record_call <- function(call, state, index=NULL) {
   # Get information about function: name, package, etc.
   fun = rlang::call_fn(call, state$options$env)
-  info = call_info(call, fun=fun)
-  name = info$name
-  full_name = paste(info$package, name, sep="::")
+  call_info = inspect_call(call, fun=fun)
+  name = call_info$name
+  full_name = paste(call_info$package, name, sep="::")
   
   # Special cases: short circuit recording of call.
   if (full_name %in% NO_RECORD_FUNS) {
@@ -154,7 +154,7 @@ record_call <- function(call, state, index=NULL) {
     in_ports = ifelse(ell, as.character(cumsum(ell)), names2(matched))
     out_port = "__return__"
     node = add_node(state, name, in_ports, out_port,
-                    if (state$options$node_data) info else list())
+                    if (state$options$node_data) call_info else list())
     map2(matched, in_ports, function(data, port) {
       c(src_node, src_port) %<-% data$source
       if (is.null(node)) {

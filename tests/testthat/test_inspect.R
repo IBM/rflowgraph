@@ -79,11 +79,11 @@ test_that("match arguments with ellipsis in function definition", {
                list(list=quote(c("iris", "iris3"))))
 })
 
-test_that("get information about function call", {
+test_that("inspect function call", {
   lm_info = list(name="lm", package="stats")
-  expect_equal(call_info(quote(lm(y~x, df))), lm_info)
-  expect_equal(call_info(quote(stats::lm(y~x, df))), lm_info)
+  expect_equal(inspect_call(quote(lm(y~x, df))), lm_info)
+  expect_equal(inspect_call(quote(stats::lm(y~x, df))), lm_info)
   
   plot_info = list(name="plot", package="graphics", system="S3")
-  expect_equal(call_info(quote(plot(x,y))), plot_info)
+  expect_equal(inspect_call(quote(plot(x,y))), plot_info)
 })

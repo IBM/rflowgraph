@@ -126,11 +126,18 @@ call_args_match <- function(call, env=rlang::caller_env()) {
                  rlang::call_args(call))
 }
 
-#' Get information about function call
+#' Inspect call
 #' 
-#' @description A one-stop shop for information about a function being called,
-#' supporting functions (closures and primitives) and methods (S3, S4, R5, R6).
-call_info <- function(call, env=rlang::caller_env(), fun=NULL) {
+#' @description A convenience method for inspecting function calls, which
+#' supports functions (closures and primitives) and methods (S3, S4, R5, R6).
+#' 
+#' @return A named list with items possibly including:
+#' \itemize{
+#' \item \code{name}: Name of function
+#' \item \code{package}: Package where function is defined
+#' \item \code{system}: Class system used by function, if it's a method
+#' }
+inspect_call <- function(call, env=rlang::caller_env(), fun=NULL) {
   stopifnot(is.call(call))
   if (is.null(fun))
     fun = rlang::call_fn(call, env)

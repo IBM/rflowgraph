@@ -34,7 +34,7 @@ annotator <- R6Class("annotator",
       }
     },
     annotate_call = function(call, env=rlang::caller_env()) {
-      info = call_info(call, env)
+      info = inspect_call(call, env)
       self$annotate_function(info$name, info$package)
     },
     annotate_function = function(name, package) {
