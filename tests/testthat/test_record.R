@@ -80,7 +80,7 @@ test_that("record calls with ellipses", {
   expect_equal(record(sum(1,1)), g)
 })
 
-test_that("record with node data", {
+test_that("record and store node data", {
   g = wiring_diagram()
   add_node(g, "numeric:1", list(), ret, list(kind="literal"))
   add_node(g, "numeric:2", list(), ret, list(kind="literal"))
@@ -91,7 +91,7 @@ test_that("record with node data", {
   expect_equal(h, g)
 })
 
-test_that("record with port data", {
+test_that("record and store port data", {
   num_data = list(class="numeric", system="S3")
   num_out = set_names(list(num_data), ret)
   g = wiring_diagram()
@@ -101,5 +101,17 @@ test_that("record with port data", {
   add_edge(g, "numeric:1", "+:1", ret, "e1")
   add_edge(g, "numeric:2", "+:1", ret, "e2")
   h = record(1+1, port_data=TRUE)
+  expect_equal(h, g)
+})
+
+test_that("record and store object values", {
+  out_value = function(v) set_names(list(list(value=v)), ret)
+  g = wiring_diagram()
+  add_node(g, "numeric:1", list(), out_value(1))
+  add_node(g, "numeric:2", list(), out_value(1))
+  add_node(g, "+:1", list(e1=list(value=1), e2=list(value=1)), out_value(2))
+  add_edge(g, "numeric:1", "+:1", ret, "e1")
+  add_edge(g, "numeric:2", "+:1", ret, "e2")
+  h = record(1+1, values=TRUE)
   expect_equal(h, g)
 })

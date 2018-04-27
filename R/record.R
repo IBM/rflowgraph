@@ -19,16 +19,18 @@
 #' @param x (unevaluated) expression to evaluate and record
 #' @param env evaluation environment
 #' @param data convenience switch for data storage (nodes, ports, edges)
-#' @param node_data whether to store function information as node data
-#' @param port_data whether to store object information as port data
+#' @param node_data whether to store function metadata as node data
+#' @param port_data whether to store object metadata as port data
+#' @param values whether to store object values as port data
 #' 
 #' @return A flow graph, of class \code{wiring_diagram}, for the evaluation.
 #' 
 #' @export
 record <- function(x, env=rlang::caller_env(), data=FALSE,
-                   node_data=data, port_data=data) {
+                   node_data=data, port_data=data, values=data) {
   expr = substitute(x)
-  state = record_state$new(list(env=env, node_data=node_data, port_data=port_data))
+  state = record_state$new(list(
+    env=env, node_data=node_data, port_data=port_data, values=values))
   env$`__record__` = function(...) record_(..., state=state)
   tryCatch({
     state$eval(transform_ast(expr))
@@ -194,7 +196,11 @@ make_node_data <- function(state, info) {
 }
 
 make_port_data <- function(state, value) {
-  if (state$options$port_data) inspect_obj(value) else list()
+  # FIXME: There should options to control which values get stored.
+  # Only atomic vectors? Only values that are not too big (by memory size)?
+  opts = state$options
+  c(if (opts$values) list(value=value) else list(),
+    if (opts$port_data) inspect_obj(value) else list())
 }
 
 # Data structures
