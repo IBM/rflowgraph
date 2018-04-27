@@ -68,13 +68,13 @@ record_ <- function(x, state, index=NULL) {
 
 record_literal <- function(value, state, index=NULL) {
   # Create nullary node for literal.
-  out_ports = list(`__return__`=port_data(state, value))
+  out_ports = list(make_port_data(state, value)) %>% set_names(return_port)
   data = if (state$options$node_data) list(kind="literal") else list()
   node = add_node(state, class(value), list(), out_ports, data)
   
   # Attach value to node.
   graph_state = state$graph_state()
-  graph_state$observe(index, list(node,"__return__"), value)
+  graph_state$observe(index, list(node,return_port), value)
   
   return(value)
 }
@@ -155,17 +155,16 @@ record_call <- function(call, state, index=NULL) {
 
     # Create call node.
     ell = names2(matched) == "" # missing names due to ellipsis
-    in_ports = ifelse(ell, as.character(cumsum(ell)), names2(matched))
-    in_ports_data = matched %>% 
-      map(function(data) port_data(state, data$value)) %>%
-      set_names(in_ports)
-    out_port = "__return__"
-    out_ports_data = list(port_data(state, value)) %>% set_names(out_port)
-    data = if (state$options$node_data) call_info else list()
-    node = add_node(state, name, in_ports_data, out_ports_data, data)
+    in_port_names = ifelse(ell, as.character(cumsum(ell)), names2(matched))
+    in_ports = matched %>%
+      map(function(data) make_port_data(state, data$value)) %>%
+      set_names(in_port_names)
+    out_ports = list(make_port_data(state, value)) %>% set_names(return_port)
+    data = make_node_data(state, call_info)
+    node = add_node(state, name, in_ports, out_ports, data)
     
     # Add edges from observed argument nodes.
-    map2(matched, in_ports, function(data, port) {
+    map2(matched, in_port_names, function(data, port) {
       c(src_node, src_port) %<-% data$source
       if (is.null(node)) {
         # TODO: Add edge to input port of diagram.
@@ -176,7 +175,7 @@ record_call <- function(call, state, index=NULL) {
   }
   
   # Attach call value to node.
-  graph_state$observe(index, list(node,out_port), value)
+  graph_state$observe(index, list(node,return_port), value)
   
   return(value)
 }
@@ -190,7 +189,11 @@ add_node.record_state = function(state, name, ...) {
   node
 }
 
-port_data <- function(state, value) {
+make_node_data <- function(state, info) {
+  if (state$options$node_data) info else list()
+}
+
+make_port_data <- function(state, value) {
   if (state$options$port_data) inspect_obj(value) else list()
 }
 
@@ -304,3 +307,5 @@ NO_RECORD_FUNS <- c(
   "base::require",
   "base::requireNamespace"
 )
+
+return_port = "__return__"
