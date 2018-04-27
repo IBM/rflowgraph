@@ -90,3 +90,16 @@ test_that("record with node data", {
   h = record(1+1, node_data=TRUE)
   expect_equal(h, g)
 })
+
+test_that("record with port data", {
+  num_data = list(class="numeric", system="S3")
+  num_out = set_names(list(num_data), ret)
+  g = wiring_diagram()
+  add_node(g, "numeric:1", list(), num_out)
+  add_node(g, "numeric:2", list(), num_out)
+  add_node(g, "+:1", list(e1=num_data, e2=num_data), num_out)
+  add_edge(g, "numeric:1", "+:1", ret, "e1")
+  add_edge(g, "numeric:2", "+:1", ret, "e2")
+  h = record(1+1, port_data=TRUE)
+  expect_equal(h, g)
+})

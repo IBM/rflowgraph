@@ -4,14 +4,19 @@
 \alias{record}
 \title{Record as flow graph}
 \usage{
-record(x, env = rlang::caller_env(), node_data = FALSE)
+record(x, env = rlang::caller_env(), data = FALSE, node_data = data,
+  port_data = data)
 }
 \arguments{
 \item{x}{(unevaluated) expression to evaluate and record}
 
 \item{env}{evaluation environment}
 
+\item{data}{convenience switch for data storage (nodes, ports, edges)}
+
 \item{node_data}{whether to store function information as node data}
+
+\item{port_data}{whether to store object information as port data}
 }
 \value{
 A flow graph, of class \code{wiring_diagram}, for the evaluation.

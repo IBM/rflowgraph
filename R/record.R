@@ -18,14 +18,17 @@
 #' 
 #' @param x (unevaluated) expression to evaluate and record
 #' @param env evaluation environment
+#' @param data convenience switch for data storage (nodes, ports, edges)
 #' @param node_data whether to store function information as node data
+#' @param port_data whether to store object information as port data
 #' 
 #' @return A flow graph, of class \code{wiring_diagram}, for the evaluation.
 #' 
 #' @export
-record <- function(x, env=rlang::caller_env(), node_data=FALSE) {
+record <- function(x, env=rlang::caller_env(), data=FALSE,
+                   node_data=data, port_data=data) {
   expr = substitute(x)
-  state = record_state$new(list(env=env, node_data=node_data))
+  state = record_state$new(list(env=env, node_data=node_data, port_data=port_data))
   env$`__record__` = function(...) record_(..., state=state)
   tryCatch({
     state$eval(transform_ast(expr))
@@ -65,8 +68,9 @@ record_ <- function(x, state, index=NULL) {
 
 record_literal <- function(value, state, index=NULL) {
   # Create nullary node for literal.
-  node = add_node(state, class(value), list(), c("__return__"),
-                  if (state$options$node_data) list(kind="literal") else list())
+  out_ports = list(`__return__`=port_data(state, value))
+  data = if (state$options$node_data) list(kind="literal") else list()
+  node = add_node(state, class(value), list(), out_ports, data)
   
   # Attach value to node.
   graph_state = state$graph_state()
@@ -149,12 +153,18 @@ record_call <- function(call, state, index=NULL) {
     matched = fun_args_match(names(fun_args(fun)), observed) %>%
       discard(rlang::is_missing)
 
-    # Create call node and edges to observed argument nodes.
+    # Create call node.
     ell = names2(matched) == "" # missing names due to ellipsis
     in_ports = ifelse(ell, as.character(cumsum(ell)), names2(matched))
+    in_ports_data = matched %>% 
+      map(function(data) port_data(state, data$value)) %>%
+      set_names(in_ports)
     out_port = "__return__"
-    node = add_node(state, name, in_ports, out_port,
-                    if (state$options$node_data) call_info else list())
+    out_ports_data = list(port_data(state, value)) %>% set_names(out_port)
+    data = if (state$options$node_data) call_info else list()
+    node = add_node(state, name, in_ports_data, out_ports_data, data)
+    
+    # Add edges from observed argument nodes.
     map2(matched, in_ports, function(data, port) {
       c(src_node, src_port) %<-% data$source
       if (is.null(node)) {
@@ -178,6 +188,10 @@ add_node.record_state = function(state, name, ...) {
   node = paste(name, i, sep=":")
   add_node(state$graph(), node, ...)
   node
+}
+
+port_data <- function(state, value) {
+  if (state$options$port_data) inspect_obj(value) else list()
 }
 
 # Data structures
