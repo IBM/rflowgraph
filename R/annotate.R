@@ -43,10 +43,8 @@ annotate <- function(g, db=NULL, nodes=TRUE, ports=TRUE) {
   # no reliable strategy to disambiguate anyway, only heuristics. For now
   # we just punt on the whole issue.
   for (node in nodes(g)) {
-    if (nodes) {
-      key = annotate_node(annotator, node_data(g, node))
-      if (!is.null(key)) node_attr(g, node, "annotation") <- key
-    }
+    if (nodes)
+      annotate_node(annotator, g, node)
     if (ports) {
       for (port in input_ports(g, node)) {
         key = annotate_port(annotator, input_port_data(g, node, port))
@@ -61,14 +59,26 @@ annotate <- function(g, db=NULL, nodes=TRUE, ports=TRUE) {
   g
 }
 
-annotate_node <- function(annotator, data) {
+annotate_node <- function(annotator, g, node) {
+  data = node_data(g, node)
   kind = get_default(data, "kind", "function")
-  if (kind == "literal")
-    # TODO: Handle this case.
-    return(NULL)
-  annotator$annotate_function(data$name, data$package)
+  switch(kind,
+    `function`={
+      key = annotator$annotate_function(data$name, data$package)
+      if (!is.null(key))
+        node_attr(g, node, "annotation") <- key
+    },
+    literal={
+      key = annotate_port(annotator, output_port_data(g, node, return_port))
+      if (!is.null(key))
+        node_data(g, node) <- list(annotation=key, annotation_kind="construct")
+    },
+    stop("Unknown node kind: ", kind)
+  )
 }
 
 annotate_port <- function(annotator, data) {
-  annotator$annotate_type(data$class, data$system)
+  if (!is_empty(data)) {
+    annotator$annotate_type(data$class, data$system)
+  }
 }
