@@ -128,8 +128,8 @@ call_args_match <- function(call, env=rlang::caller_env()) {
 
 #' Inspect call
 #' 
-#' @description A convenience method for inspecting function calls, which
-#' supports functions (closures and primitives) and methods (S3, S4, R5, R6).
+#' @description A convenience function for inspecting calls, which supports
+#' functions (closures and primitives) and methods (S3, S4, R5, R6).
 #' 
 #' @return A named list with items possibly including:
 #' \itemize{
@@ -137,6 +137,8 @@ call_args_match <- function(call, env=rlang::caller_env()) {
 #' \item \code{package}: Package where function is defined
 #' \item \code{system}: Class system used by function, if it's a method
 #' }
+#' 
+#' @seealso \code{\link{inspect_obj}}
 inspect_call <- function(call, env=rlang::caller_env(), fun=NULL) {
   stopifnot(is.call(call))
   if (is.null(fun))
@@ -154,4 +156,21 @@ inspect_call <- function(call, env=rlang::caller_env(), fun=NULL) {
   })
   system = class_system(fun)
   compact(list(name=name, package=pkg, system=system))
+}
+
+#' Inspect object
+#' 
+#' @description A convenience function for inspecting function objects.
+#' 
+#' @return A named list with items including:
+#' \itemize{
+#' \item \code{class}: Classes of object.
+#' \item \code{system}: Class system used by object.
+#' }
+#' 
+#' @seealso \code{\link{inspect_call}}
+inspect_obj <- function(x) {
+  cls = class(x)
+  attributes(cls) = NULL
+  compact(list(class=cls, system=class_system(x)))
 }

@@ -15,6 +15,9 @@ A named list with items possibly including:
 }
 }
 \description{
-A convenience method for inspecting function calls, which
-supports functions (closures and primitives) and methods (S3, S4, R5, R6).
+A convenience function for inspecting calls, which supports
+functions (closures and primitives) and methods (S3, S4, R5, R6).
+}
+\seealso{
+\code{\link{inspect_obj}}
 }

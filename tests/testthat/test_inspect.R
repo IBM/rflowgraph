@@ -87,3 +87,10 @@ test_that("inspect function call", {
   plot_info = list(name="plot", package="graphics", system="S3")
   expect_equal(inspect_call(quote(plot(x,y))), plot_info)
 })
+
+test_that("inspect objects",{
+  expect_equal(inspect_obj(1), list(class="numeric", system="S3"))
+  expect_equal(inspect_obj(dict()), list(class="dict", system="S3"))
+  expect_equal(inspect_obj(ordered_dict()),
+               list(class=c("ordered_dict","dict","R6"), system="R6"))
+})
