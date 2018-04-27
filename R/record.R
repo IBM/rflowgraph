@@ -18,7 +18,11 @@
 #' 
 #' @param x (unevaluated) expression to evaluate and record
 #' @param env evaluation environment
-#' @param data convenience switch for data storage (nodes, ports, edges)
+#' @param annotate whether to annotate the flow graph
+#' @param db annotation database, if annotation is enabled
+#'   (by default, the Data Science Ontology)
+#' @param data convenience switch for data storage 
+#'   (node data, port data, values)
 #' @param node_data whether to store function metadata as node data
 #' @param port_data whether to store object metadata as port data
 #' @param values whether to store object values as port data
@@ -26,8 +30,8 @@
 #' @return A flow graph, of class \code{wiring_diagram}, for the evaluation.
 #' 
 #' @export
-record <- function(x, env=rlang::caller_env(), data=FALSE,
-                   node_data=data, port_data=data, values=data) {
+record <- function(x, env=rlang::caller_env(), annotate=FALSE, db=NULL,
+                   data=annotate, node_data=data, port_data=data, values=data) {
   expr = substitute(x)
   state = record_state$new(list(
     env=env, node_data=node_data, port_data=port_data, values=values))
@@ -37,7 +41,8 @@ record <- function(x, env=rlang::caller_env(), data=FALSE,
   }, finally={
     rm(`__record__`, envir=env)
   })
-  state$graph()
+  graph = state$graph()
+  if (annotate) annotate(graph, db=db) else graph
 }
 
 transform_ast <- function(expr, index=NULL) {

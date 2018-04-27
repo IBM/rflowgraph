@@ -22,6 +22,24 @@
     "definition": "number"
   },
   {
+    "_id": "annotation/r/base/plus",
+    "schema": "annotation",
+    "language": "r",
+    "package": "base",
+    "id": "plus",
+    "kind": "morphism",
+    "function": "+"
+  },
+  {
+    "_id": "annotation/r/base/times",
+    "schema": "annotation",
+    "language": "r",
+    "package": "base",
+    "id": "times",
+    "kind": "morphism",
+    "function": "*"
+  },
+  {
     "_id": "annotation/r/stats/lm",
     "schema": "annotation",
     "language": "r",

@@ -4,15 +4,21 @@
 \alias{record}
 \title{Record as flow graph}
 \usage{
-record(x, env = rlang::caller_env(), data = FALSE, node_data = data,
-  port_data = data, values = data)
+record(x, env = rlang::caller_env(), annotate = FALSE, db = NULL,
+  data = annotate, node_data = data, port_data = data, values = data)
 }
 \arguments{
 \item{x}{(unevaluated) expression to evaluate and record}
 
 \item{env}{evaluation environment}
 
-\item{data}{convenience switch for data storage (nodes, ports, edges)}
+\item{annotate}{whether to annotate the flow graph}
+
+\item{db}{annotation database, if annotation is enabled
+(by default, the Data Science Ontology)}
+
+\item{data}{convenience switch for data storage 
+(node data, port data, values)}
 
 \item{node_data}{whether to store function metadata as node data}
 
