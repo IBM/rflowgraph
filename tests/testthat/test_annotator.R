@@ -23,13 +23,13 @@ test_that("annotate objects by class", {
   annotate = function(x) annotator$annotate_object(x)
   
   # Builtin S3 classes.
-  expect_equal(annotate(0L)$id, "integer")
-  expect_equal(annotate(0)$id, "numeric")
+  expect_equal(annotate(0L), "r/base/integer")
+  expect_equal(annotate(0), "r/base/numeric")
   
   # Inheritance in S3.
-  expect_equal(annotate(structure(0,class="lm"))$id, "lm")
-  expect_equal(annotate(structure(0,class=c("glm","lm")))$id, "glm")
-  expect_equal(annotate(structure(0,class=c("my-lm","lm")))$id, "lm")
+  expect_equal(annotate(structure(0,class="lm")), "r/stats/lm")
+  expect_equal(annotate(structure(0,class=c("glm","lm"))), "r/stats/glm")
+  expect_equal(annotate(structure(0,class=c("my-lm","lm"))), "r/stats/lm")
 })
 
 test_that("annotation calls by function name and package", {
@@ -37,8 +37,8 @@ test_that("annotation calls by function name and package", {
   annotate = function(x) annotator$annotate_call(substitute(x))
   
   # Named call.
-  expect_equal(annotate(lm(y~x-1, df))$id, "lm-fit")
+  expect_equal(annotate(lm(y~x-1, df)), "r/stats/lm-fit")
   
   # Namespaced call.
-  expect_equal(annotate(stats::lm(y~x-1, df))$id, "lm-fit")
+  expect_equal(annotate(stats::lm(y~x-1, df)), "r/stats/lm-fit")
 })

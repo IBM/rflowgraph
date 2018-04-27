@@ -33,6 +33,7 @@ annotator <- R6Class("annotator",
           loaded[[package]] = FALSE
       }
     },
+    annotation = function(...) private$db$annotation(...),
     annotate_call = function(call, env=rlang::caller_env()) {
       info = inspect_call(call, env)
       self$annotate_function(info$name, info$package)
@@ -50,7 +51,7 @@ annotator <- R6Class("annotator",
         if (nrow(match) > 1) {
           warning("Multiple annotations match function: ", package, "::", name)
         }
-        db$annotation(match[[1,"key"]])
+        match[[1,"key"]]
       }
     },
     annotate_object = function(x) {
@@ -83,7 +84,7 @@ annotator <- R6Class("annotator",
             # When multiple annotations match the same class, return the first one.
             warning("Multiple annotations match class: ", cls)
           }
-          return(db$annotation(match[[1,"key"]]))
+          return(match[[1,"key"]])
         }
       }
     }
