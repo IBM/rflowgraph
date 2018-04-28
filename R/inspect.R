@@ -88,21 +88,42 @@ fun_package <- function(f) {
   name
 }
 
-#' Match arguments of function call
+#' Match arguments
 #' 
-#' @description A reimplementation of R's algorithm for argument matching,
-#' including partial matching.
-fun_args_match <- function(fun_args, call_args) {
-  stopifnot(is.character(fun_args))
-  call_args_names = names2(call_args)
+#' @description Match arguments of call to argument names of called function.
+#' 
+#' @details Mostly a wrapper around \code{match.call}, except in the case of
+#' primitive functions, which \code{match.call} doesn't support.
+#' 
+#' @seealso \code{\link{match.call}}
+match_call <- function(call, env=rlang::caller_env(), fun=NULL) {
+  stopifnot(is.call(call))
+  if (is.null(fun))
+    fun = rlang::call_fn(call, env)
   
+  if (is.primitive(fun)) {
+    # Fall back to our reimplementation of R's algorithm for argument matching.
+    match_call_(fun, call)
+  } else {
+    # Delegate to match.call.
+    names = rlang::call_args_names(call)
+    new_call = as.call(c(call[1], set_names(seq_along(names), names)))
+    matched = rlang::call_args(match.call(fun, new_call))
+    names(matched)[order(as.integer(matched))]
+  }
+}
+
+match_call_ <- function(fun, call) {
+  fun_args = names(fun_args(fun))
+  call_args = rlang::call_args_names(call)
+
   # Assign named call arguments using R's partial matching convention.
-  named = call_args_names != ""
-  i = pmatch(call_args_names[named], fun_args)
+  named = call_args != ""
+  i = pmatch(call_args[named], fun_args)
   if (any(is.na(i)))
       stop("Argument match failed: ",
            "non-matching, multiply partially matching, or duplicate names")
-  fun_args_named = fun_args[i]
+  call_args[named] = fun_args[i]
   fun_args = if (is_empty(i)) fun_args else fun_args[-i]
   
   # Assign unnamed call arguments, taking ellipsis into account.
@@ -113,17 +134,9 @@ fun_args_match <- function(fun_args, call_args) {
   if (!is.na(ell))
     # An ellipsis absorbs all following unnamed call arguments.
     i[seq2(ell, n_unnamed)] = ell
-  fun_args_unnamed = fun_args[i]
+  call_args[!named] = fun_args[i]
   
-  matched = c(call_args[!named], call_args[named])
-  names = c(fun_args_unnamed, fun_args_named)
-  if (all(names == "")) unname(matched) else set_names(matched, names)
-}
-
-#' @rdname fun_args_match
-call_args_match <- function(call, env=rlang::caller_env()) {
-  fun_args_match(names(fun_args(rlang::call_fn(call, env=env))),
-                 rlang::call_args(call))
+  call_args
 }
 
 #' Inspect call

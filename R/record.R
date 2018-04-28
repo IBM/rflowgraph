@@ -155,23 +155,20 @@ record_call <- function(call, state, index=NULL) {
     graph_state$output_table[[varname]] = list(node,out_port)
   }
   else {
-    # Match observed values to arguments.
-    names(observed) = rlang::call_args_names(call)
-    matched = fun_args_match(names(fun_args(fun)), observed) %>%
-      discard(rlang::is_missing)
-
+    # Match arguments to call, replacing missing names with numbers.
+    matched = match_call(call, fun=fun)
+    ell = matched == "" # missing names due to ellipsis
+    matched = ifelse(ell, as.character(cumsum(ell)), matched)
+    observed = observed %>% set_names(matched) %>% discard(rlang::is_missing)
+    
     # Create call node.
-    ell = names2(matched) == "" # missing names due to ellipsis
-    in_port_names = ifelse(ell, as.character(cumsum(ell)), names2(matched))
-    in_ports = matched %>%
-      map(function(data) make_port_data(state, data$value)) %>%
-      set_names(in_port_names)
+    in_ports = map(observed, function(data) make_port_data(state, data$value))
     out_ports = list(make_port_data(state, value)) %>% set_names(return_port)
     data = make_node_data(state, call_info)
     node = add_node(state, name, in_ports, out_ports, data)
     
     # Add edges from observed argument nodes.
-    map2(matched, in_port_names, function(data, port) {
+    iwalk(observed, function(data, port) {
       c(src_node, src_port) %<-% data$source
       if (is.null(node)) {
         # TODO: Add edge to input port of diagram.

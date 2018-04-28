@@ -61,22 +61,28 @@ test_that("get package of function", {
   expect_equal(fun_package(ExampleRefClass$new), pkg)
 })
 
-test_that("match arguments of function call", {
-  matched = list(formula=y~x, data=quote(df))
-  expect_equal(call_args_match(quote(lm(y~x, df))), matched)
-  
-  matched = list(formula=y~x, data=quote(df), method="qr")
-  expect_equal(call_args_match(quote(lm(y~x, df, method="qr"))), matched)
-  expect_equal(call_args_match(quote(lm(y~x, method="qr", df))), matched)
-  expect_equal(call_args_match(quote(lm(data=df, method="qr", y~x))), matched)
+test_that("match arguments", {
+  expect_equal(match_call(quote(lm(y~x, df))), c("formula", "data"))
+  expect_equal(match_call(quote(lm(y~x, df, method="qr"))),
+               c("formula", "data", "method"))
+  expect_equal(match_call(quote(lm(y~x, method="qr", df))),
+               c("formula", "method", "data"))
+  expect_equal(match_call(quote(lm(data=df, method="qr", y~x))),
+               c("data", "method", "formula"))
 })
 
-test_that("match arguments with ellipsis in function definition", {
-  expect_equal(call_args_match(quote(data(iris))), list(quote(iris)))
-  expect_equal(call_args_match(quote(data(iris, iris3))),
-               list(quote(iris), quote(iris3)))
-  expect_equal(call_args_match(quote(data(list=c("iris", "iris3")))),
-               list(list=quote(c("iris", "iris3"))))
+test_that("match arguments with ellipsis", {
+  expect_equal(match_call(quote(data(iris))), "")
+  expect_equal(match_call(quote(data(iris, iris3))), c("", ""))
+  expect_equal(match_call(quote(data(list=c("iris", "iris3")))), "list")
+})
+
+test_that("match arguments of primitive function", {
+  expect_equal(match_call(quote(x+y)), c("e1","e2"))
+})
+
+test_that("match arguments of primitive function with ellipsis", {
+  expect_equal(match_call(quote(sum(x,y,z))), c("","",""))
 })
 
 test_that("inspect function call", {
