@@ -114,7 +114,7 @@ match_call <- function(call, env=rlang::caller_env(), fun=NULL) {
 }
 
 match_call_ <- function(fun, call) {
-  fun_args = names(fun_args(fun))
+  fun_args = names2(fun_args(fun))
   call_args = rlang::call_args_names(call)
 
   # Assign named call arguments using R's partial matching convention.
