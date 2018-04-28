@@ -124,9 +124,18 @@ record_call <- function(call, state, index=NULL) {
     stop("Not implemented: recording function definition")
   }
   
+  # Prepare to evaluate function call.
+  graph_state = state$graph_state()
+  graph_state$push_call(call)
+  
   # Transform call arguments.
   args = rlang::call_args(call)
-  new_call = if (full_name %in% ASSIGN_FUNS) {
+  new_call = if (name == "$") {
+    # Special case: Slot access.
+    stopifnot(length(args) == 2)
+    record_literal(as.character(args[[2]]), state, 2L)
+    rlang::call2(name, transform_ast(args[[1]], 1L), args[[2]])
+  } else if (full_name %in% ASSIGN_FUNS) {
     # Special case: Variable assignment.
     stopifnot(length(args) == 2)
     rlang::call2(name, args[[1]], transform_ast(args[[2]], 1L))
@@ -137,8 +146,6 @@ record_call <- function(call, state, index=NULL) {
   }
 
   # Evaluate function call.
-  graph_state = state$graph_state()
-  graph_state$push_call(new_call)
   value = state$eval(new_call) # Evaluate!
   call_state = graph_state$pop_call()
   observed = call_state$observed_args()

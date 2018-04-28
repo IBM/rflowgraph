@@ -80,6 +80,20 @@ test_that("record calls with ellipses", {
   expect_equal(record(sum(1,1)), g)
 })
 
+test_that("record slot access", {
+  value = function (v) list(value=v)
+  out_value = function(v) set_names(list(value(v)), ret)
+  
+  x = list(foo=1, bar=2)
+  g = wiring_diagram()
+  add_node(g, "character:1", list(), out_value("foo"))
+  add_node(g, "$:1", list(`1`=value(x), `2`=value("foo")), out_value(1))
+  add_edge(g, "character:1", "$:1", ret, "2")
+  
+  h = record(x$foo, values=TRUE)
+  expect_equal(h, g)
+})
+
 test_that("record and store node data", {
   g = wiring_diagram()
   add_node(g, "numeric:1", list(), ret, list(kind="literal"))
