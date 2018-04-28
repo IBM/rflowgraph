@@ -52,9 +52,18 @@ class_system <- function(x) {
 #' 
 #' @return A named list.
 fun_args <- function(f) {
-  # Use args() for primitive functions: https://stackoverflow.com/q/25978301
   stopifnot(is.function(f))
-  as.list(formals(if (is.primitive(f)) args(f) else f))
+  if (is.primitive(f)) {
+    # Use args() for primitive functions: https://stackoverflow.com/q/25978301
+    args = args(f)
+    if (is.null(args))
+      # However, a few primitives, like `[`, don't even have args(). Give up.
+      list(`...` = rlang::missing_arg())
+    else
+      as.list(formals(args))
+  } else {
+    as.list(formals(f))
+  }
 }
 
 #' Get package of function

@@ -46,6 +46,8 @@ test_that("get class system of function", {
 test_that("get arguments of function", {
   expect_equal(names(fun_args(is.function)), "x") # primitive
   expect_equal(names(fun_args(is.primitive)), "x") # not primitive
+  expect_equal(names(fun_args(`[`)), "...")
+  expect_equal(names(fun_args(sum)), c("...", "na.rm"))
 })
 
 test_that("get package of function", {
@@ -83,6 +85,7 @@ test_that("match arguments of primitive function", {
 
 test_that("match arguments of primitive function with ellipsis", {
   expect_equal(match_call(quote(sum(x,y,z))), c("","",""))
+  expect_equal(match_call(quote(df[,names(df)!="foo"])), c("","",""))
 })
 
 test_that("inspect function call", {
