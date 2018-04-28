@@ -46,7 +46,10 @@ record <- function(x, env=rlang::caller_env(), annotate=FALSE, db=NULL,
 }
 
 transform_ast <- function(expr, index=NULL) {
-  rlang::call2("__record__", !!! compact(list(expr, index)))
+  if (rlang::is_missing(expr))
+    expr
+  else
+    rlang::call2("__record__", expr, index)
 }
 
 record_ <- function(x, state, index=NULL) {
