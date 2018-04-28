@@ -20,9 +20,7 @@ test_that("annotations are loaded from a local file", {
   db = annotation_db$new()
   expect_equal(db$tbl() %>% collect %>% nrow, 0)
   
-  path = system.file("extdata", "tests", "annotations.json",
-                     package="opendisc", mustWork=TRUE)
-  db$load_json(path)
+  db$load_json(file.path("data", "annotations.json"))
   base_tbl = db$tbl() %>% filter(package=="base") %>% collect
   expect_true("integer" %in% base_tbl$class)
   expect_true("numeric" %in% base_tbl$class)

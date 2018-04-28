@@ -15,8 +15,7 @@
 context("integration")
 
 test_that("record k-means clustering on Iris data", {
-  path = system.file("extdata", "tests", "datasets", "iris.csv",
-                     package="opendisc", mustWork=TRUE)
+  path = file.path("data", "datasets", "iris.csv")
   h = record({
     iris = read.csv(path, stringsAsFactors=FALSE)
     iris = iris[, names(iris) != "Species"]

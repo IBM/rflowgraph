@@ -15,8 +15,8 @@
 context("annotate")
 
 db = annotation_db$new()
-db$load_json(system.file("extdata", "tests", "annotations.json",
-                         package="opendisc", mustWork=TRUE))
+db$load_json(file.path("data", "annotations.json"))
+
 ret = "__return__"
 
 test_that("annotate nodes of flow graph", {

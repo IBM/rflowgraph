@@ -15,8 +15,7 @@
 context("annotator")
 
 db = annotation_db$new()
-db$load_json(system.file("extdata", "tests", "annotations.json",
-                         package="opendisc", mustWork=TRUE))
+db$load_json(file.path("data", "annotations.json"))
 
 test_that("annotate objects by class", {
   annotator = annotator$new(db)
