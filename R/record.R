@@ -170,7 +170,7 @@ record_call <- function(call, state, index=NULL) {
     # Add edges from observed argument nodes.
     iwalk(observed, function(data, port) {
       c(src_node, src_port) %<-% data$source
-      if (is.null(node)) {
+      if (is.null(src_node)) {
         # TODO: Add edge to input port of diagram.
       } else {
         add_edge(graph_state$graph, src_node, node, src_port, port)
