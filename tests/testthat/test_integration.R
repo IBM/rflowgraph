@@ -15,15 +15,8 @@
 context("integration")
 
 test_that("record k-means clustering on Iris data", {
-  path = file.path("data", "datasets", "iris.csv")
-  h = record({
-    iris = read.csv(path, stringsAsFactors=FALSE)
-    iris = iris[, names(iris) != "Species"]
-    
-    km = kmeans(iris, 3)
-    centroids = km$centers
-    clusters = km$cluster
-  }, annotate=TRUE, values=FALSE)
+  h = record_expr(file(file.path("data", "clustering_kmeans.R")),
+                  cwd="data", annotate=TRUE, values=FALSE)
   expect_equal(names(iris), c("SepalLength","SepalWidth","PetalLength","PetalWidth"))
   expect_is(centroids, "matrix")
   expect_is(clusters, "integer")
