@@ -31,6 +31,7 @@ annotator <- R6Class("annotator",
       if (inherits(db, "remote_annotation_db")) {
         for (package in db$list_packages())
           loaded[[package]] = FALSE
+        private$load_package("base")
       }
     },
     annotation = function(...) private$db$annotation(...),
