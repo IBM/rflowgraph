@@ -16,8 +16,10 @@
 #' 
 #' @description Record the evaluation of an R expression as a flow graph.
 #' 
-#' @param x (unevaluated) expression to evaluate and record
+#' @param x (unevaluated) expression
 #' @param env evaluation environment
+#' @param cwd working directory during evaluation (by default, the current
+#'   working directory)
 #' @param annotate whether to annotate the flow graph
 #' @param db annotation database, if annotation is enabled
 #'   (by default, the Data Science Ontology)
@@ -30,17 +32,44 @@
 #' @return A flow graph, of class \code{wiring_diagram}, for the evaluation.
 #' 
 #' @export
-record <- function(x, env=rlang::caller_env(), annotate=FALSE, db=NULL,
-                   data=annotate, node_data=data, port_data=data, values=data) {
-  expr = substitute(x)
+record <- function(x, env=rlang::caller_env(), ...) {
+  expr = as.expression(substitute(x))
+  record_expr(expr, env=env, ...)
+}
+
+#' @rdname record
+#' @export
+record_expr <- function(x, env=rlang::caller_env(), cwd=NULL,
+                        annotate=FALSE, db=NULL, data=annotate,
+                        node_data=data, port_data=data, values=data) {
+  # Validate arguments and prepare recording state.
+  exprs = if (is.expression(x)) as.list(x) else rlang::parse_exprs(x)
+  expr = if (length(exprs) == 1)
+    exprs[[1]]
+  else
+    as.call(c(list(quote(`{`)), exprs))
+  
   state = record_state$new(list(
     env=env, node_data=node_data, port_data=port_data, values=values))
-  env$`__record__` = function(...) record_(..., state=state)
+  
+  # Evaluate and record, including environment setup and tear down.
+  oldwd = NULL
+  if (!is.null(cwd)) {
+    oldwd = getwd()
+    setwd(cwd)
+  }
+  env$`__record__` = function(x, index=NULL) {
+    record_expr_(substitute(x), state, index)
+  }
   tryCatch({
     state$eval(transform_ast(expr))
   }, finally={
     rm(`__record__`, envir=env)
+    if (!is.null(oldwd))
+      setwd(oldwd)
   })
+  
+  # Return flow graph, possibly after annotation.
   graph = state$graph()
   if (annotate) annotate(graph, db=db) else graph
 }
@@ -52,8 +81,7 @@ transform_ast <- function(expr, index=NULL) {
     rlang::call2("__record__", expr, index)
 }
 
-record_ <- function(x, state, index=NULL) {
-  expr = substitute(x)
+record_expr_ <- function(expr, state, index=NULL) {
   if (is.atomic(expr)) {
     # Case 1: Literal values.
     record_literal(expr, state, index)
