@@ -6,6 +6,14 @@
 \usage{
 write_graphml(graph, file = NULL)
 }
+\arguments{
+\item{graph}{Graph or wiring diagram to write}
+
+\item{file}{path to file or connection to write to}
+}
+\value{
+If \code{file} is \code{NULL}, an XML document; otherwise, nothing.
+}
 \description{
 Write graph to GraphML
 }

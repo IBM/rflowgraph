@@ -6,6 +6,9 @@
 \usage{
 read_graphml(xml, graph = NULL)
 }
+\arguments{
+\item{xml}{XML document or input to \code{xml2::read_xml}}
+}
 \description{
 Read graph from GraphML
 }

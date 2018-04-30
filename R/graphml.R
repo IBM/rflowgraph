@@ -14,6 +14,8 @@
 
 #' Read graph from GraphML
 #' 
+#' @param xml XML document or input to \code{xml2::read_xml}
+#' 
 #' @import xml2
 #' @export
 read_graphml <- function(xml, graph=NULL) {
@@ -154,6 +156,11 @@ read_graphml_data_value <- function(attr_type, s) {
 }
 
 #' Write graph to GraphML
+#' 
+#' @param graph Graph or wiring diagram to write
+#' @param file path to file or connection to write to
+#' 
+#' @return If \code{file} is \code{NULL}, an XML document; otherwise, nothing.
 #' 
 #' @import xml2
 #' @export
