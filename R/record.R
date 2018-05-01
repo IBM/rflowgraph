@@ -232,7 +232,10 @@ add_node.record_state = function(state, name, ...) {
 }
 
 make_node_data <- function(state, info) {
-  if (state$options$node_data) info else list()
+  if (state$options$node_data)
+    compact(list(`function`=info$name, package=info$package, system=info$system))
+  else
+    list()
 }
 
 make_port_data <- function(state, value) {

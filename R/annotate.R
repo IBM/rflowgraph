@@ -64,7 +64,7 @@ annotate_node <- function(annotator, g, node) {
   kind = get_default(data, "kind", "function")
   switch(kind,
     `function`={
-      key = annotator$annotate_function(data$name, data$package)
+      key = annotator$annotate_function(data$`function`, data$package)
       if (!is.null(key))
         node_attr(g, node, "annotation") <- key
     },

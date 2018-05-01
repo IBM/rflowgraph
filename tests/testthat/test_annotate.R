@@ -24,7 +24,7 @@ test_that("annotate nodes of flow graph", {
   add_node(g, "numeric:1", list(), ret, list(kind="literal"))
   add_node(g, "numeric:2", list(), ret, list(kind="literal"))
   add_node(g, "+:1", c("e1","e2"), ret, list(
-    name="+", package="base", annotation="r/base/plus"))
+    `function`="+", package="base", annotation="r/base/plus"))
   add_edge(g, "numeric:1", "+:1", ret, "e1")
   add_edge(g, "numeric:2", "+:1", ret, "e2")
   
@@ -59,7 +59,7 @@ test_that("annotate nodes and ports of flow graph", {
     annotation="r/base/numeric", annotation_kind="construct"
   ))
   add_node(g, "+:1", list(e1=num_port, e2=num_port), num_out, list(
-    name="+", package="base", annotation="r/base/plus"
+    `function`="+", package="base", annotation="r/base/plus"
   ))
   add_edge(g, "numeric:1", "+:1", ret, "e1")
   add_edge(g, "numeric:2", "+:1", ret, "e2")

@@ -98,7 +98,7 @@ test_that("record and store node data", {
   g = wiring_diagram()
   add_node(g, "numeric:1", list(), ret, list(kind="literal"))
   add_node(g, "numeric:2", list(), ret, list(kind="literal"))
-  add_node(g, "+:1", c("e1","e2"), ret, list(name="+", package="base"))
+  add_node(g, "+:1", c("e1","e2"), ret, list(`function`="+", package="base"))
   add_edge(g, "numeric:1", "+:1", ret, "e1")
   add_edge(g, "numeric:2", "+:1", ret, "e2")
   h = record(1+1, node_data=TRUE)
