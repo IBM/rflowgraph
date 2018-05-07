@@ -43,10 +43,11 @@ annotate <- function(g, db=NULL, nodes=TRUE, ports=TRUE) {
   # no reliable strategy to disambiguate anyway, only heuristics. For now
   # we just punt on the whole issue.
   for (node in nodes(g)) {
-    # Annotate the node itself.
-    key = if (nodes) annotate_node(annotator, g, node)
-    note = if (!is.null(key)) annotator$annotation(key)
-
+    # Load annotations for package, if not already loaded.
+    package = node_attr(g, node, "package")
+    if (!is.null(package))
+      annotator$load_package(package)
+    
     # Annotate input and output ports of node.
     if (ports) {
       for (port in input_ports(g, node)) {
@@ -61,42 +62,52 @@ annotate <- function(g, db=NULL, nodes=TRUE, ports=TRUE) {
       }
     }
     
-    # Align input and outport ports to domain and codomain of node annotation.
-    if (nodes && !is.null(note) && note$kind == "morphism") {
-      align_ports(input_ports(g, node), note$domain) %>%
-        iwalk(function(port, i) {
-          if (!is.na(port))
-            input_port_attr(g, node, port, "annotation_index") <- i
-        })
-      align_ports(output_ports(g, node), note$codomain) %>%
-        iwalk(function(port, i) {
-          if (!is.na(port))
-            output_port_attr(g, node, port, "annotation_index") <- i
-        })
-    }
+    # Annotate the node itself.
+    if (nodes)
+      annotate_node(annotator, g, node)
   }
   g
 }
 
 annotate_node <- function(annotator, g, node) {
-  key = NULL
-  data = node_data(g, node)
-  kind = get_default(data, "kind", "function")
-  switch(kind,
-    `function`={
-      key = annotator$annotate_function(data$`function`, data$package)
-      if (!is.null(key))
-        node_attr(g, node, "annotation") <- key
-    },
-    literal={
-      key = annotate_port(annotator, output_port_data(g, node, return_port))
-      if (!is.null(key))
-        node_data(g, node) <- c(node_data(g, node), list(
-          annotation=key, annotation_kind="construct"))
-    },
+  kind = get_default(node_data(g, node), "kind", "function")
+  dispatch = switch(kind,
+    `function` = annotate_function,
+    literal = annotate_literal,
     stop("Unknown node kind: ", kind)
   )
-  key
+  dispatch(annotator, g, node)
+}
+
+annotate_function <- function(annotator, g, node) {
+  data = node_data(g, node)
+  key = annotator$annotate_function(data$`function`, data$package)
+  if (is.null(key)) return()
+  
+  # Attach annotation to node.
+  node_attr(g, node, "annotation") <- key
+  
+  # Align input and outport ports to domain and codomain of annotation.
+  note = annotator$annotation(key)
+  align_ports(input_ports(g, node), note$domain) %>%
+    iwalk(function(port, i) {
+      if (!is.na(port))
+        input_port_attr(g, node, port, "annotation_index") <- i
+    })
+  align_ports(output_ports(g, node), note$codomain) %>%
+    iwalk(function(port, i) {
+      if (!is.na(port))
+        output_port_attr(g, node, port, "annotation_index") <- i
+    })
+}
+
+annotate_literal <- function(annotator, g, node) {
+  key = annotate_port(annotator, output_port_data(g, node, return_port))
+  if (is.null(key)) return()
+  
+  node_attr(g, node, "annotation") <- key
+  node_attr(g, node, "annotation_kind") <- "construct"
+  output_port_attr(g, node, return_port, "annotation_index") <- 1L
 }
 
 annotate_port <- function(annotator, data) {

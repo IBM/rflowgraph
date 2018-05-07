@@ -31,7 +31,7 @@ annotator <- R6Class("annotator",
       if (inherits(db, "remote_annotation_db")) {
         for (package in db$list_packages())
           loaded[[package]] = FALSE
-        private$load_package("base")
+        self$load_package("base")
       }
     },
     annotation = function(...) private$db$annotation(...),
@@ -40,9 +40,6 @@ annotator <- R6Class("annotator",
       self$annotate_function(info$name, info$package)
     },
     annotate_function = function(name, package) {
-      # Load annotations for package, if not already loaded.
-      private$load_package(package)
-      
       # Query DB for annotations matching package and function name.
       db = private$db
       match = db$tbl() %>%
@@ -88,11 +85,7 @@ annotator <- R6Class("annotator",
           return(match[[1,"key"]])
         }
       }
-    }
-  ),
-  private = list(
-    db = NULL,
-    loaded = NULL,
+    },
     load_package = function(package) {
       loaded = private$loaded
       if (!get_default(loaded, package, TRUE)) {
@@ -100,5 +93,9 @@ annotator <- R6Class("annotator",
         loaded[[package]] = TRUE
       }
     }
+  ),
+  private = list(
+    db = NULL,
+    loaded = NULL
   )
 )

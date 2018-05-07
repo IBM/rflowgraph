@@ -54,9 +54,9 @@ test_that("annotate ports of flow graph", {
 
 test_that("annotate nodes and ports of flow graph", {
   g = wiring_diagram()
-  add_node(g, "integer:1", list(), out_port(int), list(
+  add_node(g, "integer:1", list(), out_port(int,1), list(
     kind="literal", annotation="r/base/integer", annotation_kind="construct"))
-  add_node(g, "integer:2", list(), out_port(int), list(
+  add_node(g, "integer:2", list(), out_port(int,1), list(
     kind="literal", annotation="r/base/integer", annotation_kind="construct"))
   add_node(g, "*:1", list(e1=port(int,1), e2=port(int,2)), out_port(int,1), list(
     `function`="*", package="base", annotation="r/base/times"))
