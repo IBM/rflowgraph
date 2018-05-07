@@ -17,16 +17,21 @@ context("annotate")
 db = annotation_db$new()
 db$load_json(file.path("data", "annotations.json"))
 
-ret = "__return__"
+int = list(class="integer", system="S3", annotation="r/base/integer")
+num = list(class="numeric", system="S3", annotation="r/base/numeric")
+
+port = function(data=list(), i)
+  if (missing(i)) data else c(data, list(annotation_index=as.integer(i)))
+out_port = function(...) set_names(list(port(...)), return_port)
 
 test_that("annotate nodes of flow graph", {
   g = wiring_diagram()
-  add_node(g, "numeric:1", list(), ret, list(kind="literal"))
-  add_node(g, "numeric:2", list(), ret, list(kind="literal"))
-  add_node(g, "+:1", c("e1","e2"), ret, list(
-    `function`="+", package="base", annotation="r/base/plus"))
-  add_edge(g, "numeric:1", "+:1", ret, "e1")
-  add_edge(g, "numeric:2", "+:1", ret, "e2")
+  add_node(g, "numeric:1", list(), out_port(), list(kind="literal"))
+  add_node(g, "numeric:2", list(), out_port(), list(kind="literal"))
+  add_node(g, "+:1", list(e1=port(i=1), e2=port(i=2)), out_port(i=1),
+           list(`function`="+", package="base", annotation="r/base/plus"))
+  add_edge(g, "numeric:1", "+:1", return_port, "e1")
+  add_edge(g, "numeric:2", "+:1", return_port, "e2")
   
   h = record(1+1, node_data=TRUE, port_data=FALSE) %>%
     annotate(db=db, nodes=TRUE, ports=FALSE)
@@ -34,14 +39,12 @@ test_that("annotate nodes of flow graph", {
 })
 
 test_that("annotate ports of flow graph", {
-  num_port = list(class="numeric", system="S3", annotation="r/base/numeric")
-  num_out = set_names(list(num_port), ret)
   g = wiring_diagram()
-  add_node(g, "numeric:1", list(), num_out)
-  add_node(g, "numeric:2", list(), num_out)
-  add_node(g, "+:1", list(e1=num_port, e2=num_port), num_out)
-  add_edge(g, "numeric:1", "+:1", ret, "e1")
-  add_edge(g, "numeric:2", "+:1", ret, "e2")
+  add_node(g, "numeric:1", list(), out_port(num))
+  add_node(g, "numeric:2", list(), out_port(num))
+  add_node(g, "+:1", list(e1=num, e2=num), out_port(num))
+  add_edge(g, "numeric:1", "+:1", return_port, "e1")
+  add_edge(g, "numeric:2", "+:1", return_port, "e2")
   
   h = record(1+1, node_data=FALSE, port_data=TRUE) %>%
     annotate(db=db, nodes=FALSE, ports=TRUE)
@@ -49,21 +52,16 @@ test_that("annotate ports of flow graph", {
 })
 
 test_that("annotate nodes and ports of flow graph", {
-  num_port = list(class="numeric", system="S3", annotation="r/base/numeric")
-  num_out = set_names(list(num_port), ret)
   g = wiring_diagram()
-  add_node(g, "numeric:1", list(), num_out, list(
-    annotation="r/base/numeric", annotation_kind="construct"
-  ))
-  add_node(g, "numeric:2", list(), num_out, list(
-    annotation="r/base/numeric", annotation_kind="construct"
-  ))
-  add_node(g, "+:1", list(e1=num_port, e2=num_port), num_out, list(
-    `function`="+", package="base", annotation="r/base/plus"
-  ))
-  add_edge(g, "numeric:1", "+:1", ret, "e1")
-  add_edge(g, "numeric:2", "+:1", ret, "e2")
+  add_node(g, "integer:1", list(), out_port(int),
+           list(annotation="r/base/integer", annotation_kind="construct"))
+  add_node(g, "integer:2", list(), out_port(int),
+           list(annotation="r/base/integer", annotation_kind="construct"))
+  add_node(g, "*:1", list(e1=port(int,1), e2=port(int,2)), out_port(int,1),
+           list(`function`="*", package="base", annotation="r/base/times"))
+  add_edge(g, "integer:1", "*:1", return_port, "e1")
+  add_edge(g, "integer:2", "*:1", return_port, "e2")
   
-  h = record(1+1, data=TRUE, values=FALSE) %>% annotate(db=db)
+  h = record(1L*2L, data=TRUE, values=FALSE) %>% annotate(db=db)
   expect_equal(h, g)
 })

@@ -14,12 +14,15 @@
 
 context("integration")
 
-df_port = list(class="data.frame", system="S3", annotation="r/base/data-frame")
-num_port = list(class="numeric", system="S3", annotation="r/base/numeric")
-int_port = list(class="integer", system="S3", annotation="r/base/integer")
-chr_port = list(class="character", system="S3", annotation="r/base/character")
-lgl_port = list(class="logical", system="S3", annotation="r/base/logical")
-out_port = function(data) set_names(list(data), return_port)
+df = list(class="data.frame", system="S3", annotation="r/base/data-frame")
+num = list(class="numeric", system="S3", annotation="r/base/numeric")
+int = list(class="integer", system="S3", annotation="r/base/integer")
+chr = list(class="character", system="S3", annotation="r/base/character")
+lgl = list(class="logical", system="S3", annotation="r/base/logical")
+
+port = function(data=list(), i)
+  if (missing(i)) data else c(data, list(annotation_index=as.integer(i)))
+out_port = function(...) set_names(list(port(...)), return_port)
 
 
 test_that("record k-means clustering on Iris data", {
@@ -30,36 +33,36 @@ test_that("record k-means clustering on Iris data", {
   expect_is(centroids, "matrix")
   expect_is(clusters, "integer")
   
-  kmeans_port = list(class="kmeans", system="S3", annotation="r/stats/k-means")
+  kmeans = list(class="kmeans", system="S3", annotation="r/stats/k-means")
   g = wiring_diagram()
-  add_node(g, "character:1", list(), out_port(chr_port),
+  add_node(g, "character:1", list(), out_port(chr),
            list(annotation="r/base/character", annotation_kind="construct"))
-  add_node(g, "logical:1", list(), out_port(lgl_port),
+  add_node(g, "logical:1", list(), out_port(lgl),
            list(annotation="r/base/logical", annotation_kind="construct"))
   add_node(g, "read.csv:1",
-           list(file=chr_port, stringsAsFactors=lgl_port), out_port(df_port),
+           list(file=port(chr,1), stringsAsFactors=port(lgl)), out_port(df,1),
            list(`function`="read.csv", package="utils", annotation="r/utils/read-csv"))
-  add_node(g, "names:1", list(x=df_port), out_port(chr_port),
+  add_node(g, "names:1", list(x=df), out_port(chr),
            list(`function`="names", package="base"))
-  add_node(g, "character:2", list(), out_port(chr_port),
+  add_node(g, "character:2", list(), out_port(chr),
            list(annotation="r/base/character", annotation_kind="construct"))
-  add_node(g, "!=:1", list(e1=chr_port, e2=chr_port),
-           out_port(lgl_port), list(`function`="!=", package="base"))
-  add_node(g, "[:1", list(`1`=df_port, `3`=lgl_port),
-           out_port(df_port), list(`function`="[", package="base"))
-  add_node(g, "numeric:1", list(), out_port(num_port),
+  add_node(g, "!=:1", list(e1=chr, e2=chr),
+           out_port(lgl), list(`function`="!=", package="base"))
+  add_node(g, "[:1", list(`1`=df, `3`=lgl),
+           out_port(df), list(`function`="[", package="base"))
+  add_node(g, "numeric:1", list(), out_port(num),
            list(annotation="r/base/numeric", annotation_kind="construct"))
   add_node(g, "kmeans:1",
-           list(x=df_port, centers=num_port), out_port(kmeans_port),
+           list(x=port(df,2), centers=port(num,1)), out_port(kmeans,1),
            list(`function`="kmeans", package="stats", annotation="r/stats/fit-k-means"))
-  add_node(g, "character:3", list(), out_port(chr_port),
+  add_node(g, "character:3", list(), out_port(chr),
            list(annotation="r/base/character", annotation_kind="construct"))
-  add_node(g, "$:1", list(`1`=kmeans_port, `2`=chr_port), 
+  add_node(g, "$:1", list(`1`=kmeans, `2`=chr), 
            out_port(list(class="matrix", system="S3", annotation="r/base/matrix")),
            list(`function`="$", package="base"))
-  add_node(g, "character:4", list(), out_port(chr_port),
+  add_node(g, "character:4", list(), out_port(chr),
            list(annotation="r/base/character", annotation_kind="construct"))
-  add_node(g, "$:2", list(`1`=kmeans_port, `2`=chr_port), out_port(int_port),
+  add_node(g, "$:2", list(`1`=kmeans, `2`=chr), out_port(int),
            list(`function`="$", package="base"))
   add_edge(g, "character:1", "read.csv:1", return_port, "file")
   add_edge(g, "logical:1", "read.csv:1", return_port, "stringsAsFactors")

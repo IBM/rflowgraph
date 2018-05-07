@@ -36,8 +36,8 @@ test_that("annotation calls by function name and package", {
   annotate = function(x) annotator$annotate_call(substitute(x))
   
   # Named call.
-  expect_equal(annotate(lm(y~x-1, df)), "r/stats/lm-fit")
+  expect_equal(annotate(lm(y~x-1, df)), "r/stats/fit-lm")
   
   # Namespaced call.
-  expect_equal(annotate(stats::lm(y~x-1, df)), "r/stats/lm-fit")
+  expect_equal(annotate(stats::lm(y~x-1, df)), "r/stats/fit-lm")
 })

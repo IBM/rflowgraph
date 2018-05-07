@@ -28,7 +28,21 @@
     "package": "base",
     "id": "plus",
     "kind": "morphism",
-    "function": "+"
+    "function": "+",
+    "definition": "plus",
+    "domain": [
+      {
+        "slot": "e1"
+      },
+      {
+        "slot": "e2"
+      }
+    ],
+    "codomain": [
+      {
+        "slot": "__return__"
+      }
+    ]
   },
   {
     "_id": "annotation/r/base/times",
@@ -37,7 +51,21 @@
     "package": "base",
     "id": "times",
     "kind": "morphism",
-    "function": "*"
+    "function": "*",
+    "definition": "times",
+    "domain": [
+      {
+        "slot": 1
+      },
+      {
+        "slot": 2
+      }
+    ],
+    "codomain": [
+      {
+        "slot": 1
+      }
+    ]
   },
   {
     "_id": "annotation/r/stats/lm",
@@ -62,11 +90,11 @@
     "definition": "generalized-linear-model"
   },
   {
-    "_id": "annotation/r/stats/lm-fit",
+    "_id": "annotation/r/stats/fit-lm",
     "schema": "annotation",
     "language": "r",
     "package": "stats",
-    "id": "lm-fit",
+    "id": "fit-lm",
     "kind": "morphism",
     "function": "lm"
   }

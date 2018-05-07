@@ -43,23 +43,43 @@ annotate <- function(g, db=NULL, nodes=TRUE, ports=TRUE) {
   # no reliable strategy to disambiguate anyway, only heuristics. For now
   # we just punt on the whole issue.
   for (node in nodes(g)) {
-    if (nodes)
-      annotate_node(annotator, g, node)
+    # Annotate the node itself.
+    key = if (nodes) annotate_node(annotator, g, node)
+    note = if (!is.null(key)) annotator$annotation(key)
+
+    # Annotate input and output ports of node.
     if (ports) {
       for (port in input_ports(g, node)) {
         key = annotate_port(annotator, input_port_data(g, node, port))
-        if (!is.null(key)) input_port_attr(g, node, port, "annotation") <- key
+        if (!is.null(key))
+          input_port_attr(g, node, port, "annotation") <- key
       }
       for (port in output_ports(g, node)) {
         key = annotate_port(annotator, output_port_data(g, node, port))
-        if (!is.null(key)) output_port_attr(g, node, port, "annotation") <- key
+        if (!is.null(key))
+          output_port_attr(g, node, port, "annotation") <- key
       }
+    }
+    
+    # Align input and outport ports to domain and codomain of node annotation.
+    if (nodes && !is.null(note) && note$kind == "morphism") {
+      align_ports(input_ports(g, node), note$domain) %>%
+        iwalk(function(port, i) {
+          if (!is.na(port))
+            input_port_attr(g, node, port, "annotation_index") <- i
+        })
+      align_ports(output_ports(g, node), note$codomain) %>%
+        iwalk(function(port, i) {
+          if (!is.na(port))
+            output_port_attr(g, node, port, "annotation_index") <- i
+        })
     }
   }
   g
 }
 
 annotate_node <- function(annotator, g, node) {
+  key = NULL
   data = node_data(g, node)
   kind = get_default(data, "kind", "function")
   switch(kind,
@@ -75,10 +95,23 @@ annotate_node <- function(annotator, g, node) {
     },
     stop("Unknown node kind: ", kind)
   )
+  key
 }
 
 annotate_port <- function(annotator, data) {
   if (!is_empty(data)) {
     annotator$annotate_type(data$class, data$system)
   }
+}
+
+align_ports <- function(ports, obs) {
+  map_chr(obs, function(ob) {
+    slot = ob$slot
+    if (is.character(slot))
+      if (slot %in% ports) slot else NA_character_
+    else if (is.numeric(slot))
+      ports[[slot]]
+    else
+      stop("Unknown slot type: ", class(slot))
+  })
 }
