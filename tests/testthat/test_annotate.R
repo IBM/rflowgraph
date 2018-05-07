@@ -17,12 +17,13 @@ context("annotate")
 db = annotation_db$new()
 db$load_json(file.path("data", "annotations.json"))
 
-int = list(class="integer", system="S3", annotation="r/base/integer")
 num = list(class="numeric", system="S3", annotation="r/base/numeric")
+int = list(class="integer", system="S3", annotation="r/base/integer")
 
 port = function(data=list(), i)
   if (missing(i)) data else c(data, list(annotation_index=as.integer(i)))
 out_port = function(...) set_names(list(port(...)), return_port)
+
 
 test_that("annotate nodes of flow graph", {
   g = wiring_diagram()
@@ -53,12 +54,12 @@ test_that("annotate ports of flow graph", {
 
 test_that("annotate nodes and ports of flow graph", {
   g = wiring_diagram()
-  add_node(g, "integer:1", list(), out_port(int),
-           list(annotation="r/base/integer", annotation_kind="construct"))
-  add_node(g, "integer:2", list(), out_port(int),
-           list(annotation="r/base/integer", annotation_kind="construct"))
-  add_node(g, "*:1", list(e1=port(int,1), e2=port(int,2)), out_port(int,1),
-           list(`function`="*", package="base", annotation="r/base/times"))
+  add_node(g, "integer:1", list(), out_port(int), list(
+    kind="literal", annotation="r/base/integer", annotation_kind="construct"))
+  add_node(g, "integer:2", list(), out_port(int), list(
+    kind="literal", annotation="r/base/integer", annotation_kind="construct"))
+  add_node(g, "*:1", list(e1=port(int,1), e2=port(int,2)), out_port(int,1), list(
+    `function`="*", package="base", annotation="r/base/times"))
   add_edge(g, "integer:1", "*:1", return_port, "e1")
   add_edge(g, "integer:2", "*:1", return_port, "e2")
   

@@ -20,6 +20,13 @@ int = list(class="integer", system="S3", annotation="r/base/integer")
 chr = list(class="character", system="S3", annotation="r/base/character")
 lgl = list(class="logical", system="S3", annotation="r/base/logical")
 
+literal = function(key) {
+  if (missing(key))
+    list(kind="literal")
+  else
+    list(kind="literal", annotation=key, annotation_kind="construct")
+}
+
 port = function(data=list(), i)
   if (missing(i)) data else c(data, list(annotation_index=as.integer(i)))
 out_port = function(...) set_names(list(port(...)), return_port)
@@ -35,33 +42,27 @@ test_that("record k-means clustering on Iris data", {
   
   kmeans = list(class="kmeans", system="S3", annotation="r/stats/k-means")
   g = wiring_diagram()
-  add_node(g, "character:1", list(), out_port(chr),
-           list(annotation="r/base/character", annotation_kind="construct"))
-  add_node(g, "logical:1", list(), out_port(lgl),
-           list(annotation="r/base/logical", annotation_kind="construct"))
+  add_node(g, "character:1", list(), out_port(chr), literal("r/base/character"))
+  add_node(g, "logical:1", list(), out_port(lgl), literal("r/base/logical"))
   add_node(g, "read.csv:1",
            list(file=port(chr,1), stringsAsFactors=port(lgl)), out_port(df,1),
            list(`function`="read.csv", package="utils", annotation="r/utils/read-csv"))
   add_node(g, "names:1", list(x=df), out_port(chr),
            list(`function`="names", package="base"))
-  add_node(g, "character:2", list(), out_port(chr),
-           list(annotation="r/base/character", annotation_kind="construct"))
+  add_node(g, "character:2", list(), out_port(chr), literal("r/base/character"))
   add_node(g, "!=:1", list(e1=chr, e2=chr),
            out_port(lgl), list(`function`="!=", package="base"))
   add_node(g, "[:1", list(`1`=df, `3`=lgl),
            out_port(df), list(`function`="[", package="base"))
-  add_node(g, "numeric:1", list(), out_port(num),
-           list(annotation="r/base/numeric", annotation_kind="construct"))
+  add_node(g, "numeric:1", list(), out_port(num), literal("r/base/numeric"))
   add_node(g, "kmeans:1",
            list(x=port(df,2), centers=port(num,1)), out_port(kmeans,1),
            list(`function`="kmeans", package="stats", annotation="r/stats/fit-k-means"))
-  add_node(g, "character:3", list(), out_port(chr),
-           list(annotation="r/base/character", annotation_kind="construct"))
+  add_node(g, "character:3", list(), out_port(chr), literal("r/base/character"))
   add_node(g, "$:1", list(`1`=kmeans, `2`=chr), 
            out_port(list(class="matrix", system="S3", annotation="r/base/matrix")),
            list(`function`="$", package="base"))
-  add_node(g, "character:4", list(), out_port(chr),
-           list(annotation="r/base/character", annotation_kind="construct"))
+  add_node(g, "character:4", list(), out_port(chr), literal("r/base/character"))
   add_node(g, "$:2", list(`1`=kmeans, `2`=chr), out_port(int),
            list(`function`="$", package="base"))
   add_edge(g, "character:1", "read.csv:1", return_port, "file")

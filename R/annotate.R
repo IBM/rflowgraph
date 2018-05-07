@@ -91,7 +91,8 @@ annotate_node <- function(annotator, g, node) {
     literal={
       key = annotate_port(annotator, output_port_data(g, node, return_port))
       if (!is.null(key))
-        node_data(g, node) <- list(annotation=key, annotation_kind="construct")
+        node_data(g, node) <- c(node_data(g, node), list(
+          annotation=key, annotation_kind="construct"))
     },
     stop("Unknown node kind: ", kind)
   )
