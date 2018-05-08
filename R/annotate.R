@@ -122,8 +122,9 @@ annotate_slot <- function(annotator, g, node) {
   if (is.null(key)) return()
   
   note = annotator$annotation(key)
-  slot = paste0(node_attr(g, node, "function"), node_attr(g, node, "slot"))
-  i = get_default(note, "slots", list()) %>% detect_index(~ .$slot == slot)
+  slots = get_default(note, "slots", list())
+  slot = node_attr(g, node, "slot")
+  i = detect_index(slots, ~ .$slot == slot)
   if (i == 0L) return()
   
   node_data(g, node) <- c(node_data(g, node), list(

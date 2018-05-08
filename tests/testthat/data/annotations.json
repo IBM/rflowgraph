@@ -79,11 +79,11 @@
     "definition": "hypothesis-test",
     "slots": [
       {
-        "slot": "$p.value",
+        "slot": "p.value",
         "definition": "p-value"
       },
       {
-        "slot": "$conf.int",
+        "slot": "conf.int",
         "definition": "confidence-interval"
       }
     ]
