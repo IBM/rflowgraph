@@ -80,17 +80,26 @@ test_that("record calls with ellipses", {
   expect_equal(record(sum(1,1)), g)
 })
 
-test_that("record slot access", {
-  value = function (v) list(value=v)
-  out_value = function(v) set_names(list(value(v)), ret)
-  
-  x = list(foo=1, bar=2)
+test_that("record access of object part by name", {
   g = wiring_diagram()
-  add_node(g, "character:1", list(), out_value("foo"))
-  add_node(g, "$:1", list(`1`=value(x), `2`=value("foo")), out_value(1))
+  add_node(g, "character:1", list(), ret)
+  add_node(g, "$:1", c("1","2"), ret)
   add_edge(g, "character:1", "$:1", ret, "2")
   
-  h = record(x$foo, values=TRUE)
+  x = list(foo=1, bar=2)
+  h = record(x$foo)
+  expect_equal(h, g)
+})
+
+test_that("record access of S4 slot", {
+  g = wiring_diagram()
+  add_node(g, "character:1", list(), ret)
+  add_node(g, "@:1", c("1","2"), ret)
+  add_edge(g, "character:1", "@:1", ret, "2")
+  
+  ExampleClass = setClass("ExampleClass", representation(name="character"))
+  ex = ExampleClass(name="foo")
+  h = record(ex@name)
   expect_equal(h, g)
 })
 
@@ -119,7 +128,9 @@ test_that("record and store port data", {
 })
 
 test_that("record and store object values", {
-  out_value = function(v) set_names(list(list(value=v)), ret)
+  value = function (v) list(value=v)
+  out_value = function(v) set_names(list(value(v)), ret)
+  
   g = wiring_diagram()
   add_node(g, "numeric:1", list(), out_value(1))
   add_node(g, "numeric:2", list(), out_value(1))

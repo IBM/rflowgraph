@@ -158,7 +158,7 @@ record_call <- function(call, state, index=NULL) {
   
   # Transform call arguments.
   args = rlang::call_args(call)
-  new_call = if (name == "$") {
+  new_call = if (full_name %in% SLOT_FUNS) {
     # Special case: Slot access.
     stopifnot(length(args) == 2)
     record_literal(as.character(args[[2]]), state, 2L)
@@ -349,6 +349,10 @@ LITERAL_FUNS <- c(
   "base::~",
   "rlang::quo",
   "rlang::expr"
+)
+SLOT_FUNS <- c(
+  "base::$",
+  "base::@"
 )
 NO_RECORD_FUNS <- c(
   "base::library",
