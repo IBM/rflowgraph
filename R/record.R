@@ -200,9 +200,10 @@ record_call <- function(call, state, index=NULL) {
     observed = observed %>% set_names(matched) %>% discard(rlang::is_missing)
     
     # Create call node.
-    in_ports = map(observed, function(data) make_port_data(state, data$value))
+    in_values = map(observed, ~.$value)
+    in_ports = map(in_values, function(value) make_port_data(state, value))
     out_ports = list(make_port_data(state, value)) %>% set_names(return_port)
-    data = make_node_data(state, call_info)
+    data = make_node_data(state, call_info, in_values, value)
     node = add_node(state, name, in_ports, out_ports, data)
     
     # Add edges from observed argument nodes.
@@ -231,16 +232,18 @@ add_node.record_state = function(state, name, ...) {
   node
 }
 
-make_node_data <- function(state, info) {
+make_node_data <- function(state, call_info, in_values, out_value) {
   if (!state$options$node_data)
     return(list())
   
-  full_name = paste(info$package, info$name, sep="::")
+  full_name = paste(call_info$package, call_info$name, sep="::")
+  is_slot = full_name %in% SLOT_FUNS
   compact(list(
-    kind = if (full_name %in% SLOT_FUNS) "slot" else NULL,
-    `function` = info$name,
-    package = info$package,
-    system = info$system
+    kind = if (is_slot) "slot" else NULL,
+    slot = if (is_slot) in_values[[2]] else NULL,
+    `function` = call_info$name,
+    package = call_info$package,
+    system = call_info$system
   ))
 }
 

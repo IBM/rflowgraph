@@ -61,10 +61,12 @@ test_that("record k-means clustering on Iris data", {
   add_node(g, "character:3", list(), out_port(chr,1), literal("r/base/character"))
   add_node(g, "$:1", list(`1`=kmeans, `2`=chr), 
            out_port(list(class="matrix", system="S3", annotation="r/base/matrix")),
-           list(kind="slot", `function`="$", package="base"))
+           list(kind="slot", slot="centers", `function`="$", package="base",
+                annotation="r/stats/k-means", annotation_kind="slot", annotation_index=2L))
   add_node(g, "character:4", list(), out_port(chr,1), literal("r/base/character"))
   add_node(g, "$:2", list(`1`=kmeans, `2`=chr), out_port(int),
-           list(kind="slot", `function`="$", package="base"))
+           list(kind="slot", slot="cluster", `function`="$", package="base",
+                annotation="r/stats/k-means", annotation_kind="slot", annotation_index=1L))
   add_edge(g, "character:1", "read.csv:1", return_port, "file")
   add_edge(g, "logical:1", "read.csv:1", return_port, "stringsAsFactors")
   add_edge(g, "read.csv:1", "names:1", return_port, "x")
