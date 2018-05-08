@@ -237,13 +237,11 @@ make_node_data <- function(state, call_info, in_values, out_value) {
     return(list())
   
   full_name = paste(call_info$package, call_info$name, sep="::")
-  is_slot = full_name %in% SLOT_FUNS
   compact(list(
-    kind = if (is_slot) "slot" else NULL,
-    slot = if (is_slot) in_values[[2]] else NULL,
     `function` = call_info$name,
     package = call_info$package,
-    system = call_info$system
+    system = call_info$system,
+    slot = if (full_name %in% SLOT_FUNS) in_values[[2]] else NULL
   ))
 }
 

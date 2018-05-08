@@ -15,6 +15,7 @@
 context("integration")
 
 df = list(class="data.frame", system="S3", annotation="r/base/data-frame")
+mat = list(class="matrix", system="S3", annotation="r/base/matrix")
 num = list(class="numeric", system="S3", annotation="r/base/numeric")
 int = list(class="integer", system="S3", annotation="r/base/integer")
 chr = list(class="character", system="S3", annotation="r/base/character")
@@ -59,13 +60,12 @@ test_that("record k-means clustering on Iris data", {
            list(x=port(df,2), centers=port(num,1)), out_port(kmeans,1),
            list(`function`="kmeans", package="stats", annotation="r/stats/fit-k-means"))
   add_node(g, "character:3", list(), out_port(chr,1), literal("r/base/character"))
-  add_node(g, "$:1", list(`1`=kmeans, `2`=chr), 
-           out_port(list(class="matrix", system="S3", annotation="r/base/matrix")),
-           list(kind="slot", slot="centers", `function`="$", package="base",
+  add_node(g, "$:1", list(`1`=kmeans, `2`=chr), out_port(mat),
+           list(`function`="$", package="base", slot="centers",
                 annotation="r/stats/k-means", annotation_kind="slot", annotation_index=2L))
   add_node(g, "character:4", list(), out_port(chr,1), literal("r/base/character"))
   add_node(g, "$:2", list(`1`=kmeans, `2`=chr), out_port(int),
-           list(kind="slot", slot="cluster", `function`="$", package="base",
+           list(`function`="$", package="base", slot="cluster",
                 annotation="r/stats/k-means", annotation_kind="slot", annotation_index=1L))
   add_edge(g, "character:1", "read.csv:1", return_port, "file")
   add_edge(g, "logical:1", "read.csv:1", return_port, "stringsAsFactors")

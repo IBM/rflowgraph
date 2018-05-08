@@ -84,7 +84,7 @@ test_that("record access of object part by name", {
   g = wiring_diagram()
   add_node(g, "character:1", list(), ret, list(kind="literal"))
   add_node(g, "$:1", c("1","2"), ret, list(
-    kind="slot", slot="foo", `function`="$", package="base"))
+    `function`="$", package="base", slot="foo"))
   add_edge(g, "character:1", "$:1", ret, "2")
   
   x = list(foo=1, bar=2)
@@ -96,7 +96,7 @@ test_that("record access of S4 slot", {
   g = wiring_diagram()
   add_node(g, "character:1", list(), ret, list(kind="literal"))
   add_node(g, "@:1", c("1","2"), ret, list(
-    kind="slot", slot="name", `function`="@", package="base"))
+    `function`="@", package="base", slot="name"))
   add_edge(g, "character:1", "@:1", ret, "2")
   
   ExampleClass = setClass("ExampleClass", representation(name="character"))

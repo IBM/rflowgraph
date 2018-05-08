@@ -74,7 +74,6 @@ annotate_node <- function(annotator, g, node) {
   dispatch = switch(kind,
     `function` = annotate_function,
     literal = annotate_literal,
-    slot = annotate_slot,
     stop("Unknown node kind: ", kind)
   )
   dispatch(annotator, g, node)
@@ -82,6 +81,9 @@ annotate_node <- function(annotator, g, node) {
 
 annotate_function <- function(annotator, g, node) {
   data = node_data(g, node)
+  if (!is.null(data$slot))
+    return(annotate_slot(annotator, g, node))
+  
   key = annotator$annotate_function(data$`function`, data$package)
   if (is.null(key)) return()
   
