@@ -68,6 +68,27 @@
     ]
   },
   {
+    "_id": "annotation/r/stats/htest",
+    "schema": "annotation",
+    "language": "r",
+    "package": "stats",
+    "id": "htest",
+    "kind": "object",
+    "class": "htest",
+    "system": "S3",
+    "definition": "hypothesis-test",
+    "slots": [
+      {
+        "slot": "$p.value",
+        "definition": "p-value"
+      },
+      {
+        "slot": "$conf.int",
+        "definition": "confidence-interval"
+      }
+    ]
+  },
+  {
     "_id": "annotation/r/stats/lm",
     "schema": "annotation",
     "language": "r",
