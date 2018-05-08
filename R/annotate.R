@@ -74,6 +74,7 @@ annotate_node <- function(annotator, g, node) {
   dispatch = switch(kind,
     `function` = annotate_function,
     literal = annotate_literal,
+    slot = annotate_function,
     stop("Unknown node kind: ", kind)
   )
   dispatch(annotator, g, node)

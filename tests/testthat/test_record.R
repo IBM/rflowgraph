@@ -82,24 +82,26 @@ test_that("record calls with ellipses", {
 
 test_that("record access of object part by name", {
   g = wiring_diagram()
-  add_node(g, "character:1", list(), ret)
-  add_node(g, "$:1", c("1","2"), ret)
+  add_node(g, "character:1", list(), ret, list(kind="literal"))
+  add_node(g, "$:1", c("1","2"), ret, list(
+    kind="slot", `function`="$", package="base"))
   add_edge(g, "character:1", "$:1", ret, "2")
   
   x = list(foo=1, bar=2)
-  h = record(x$foo)
+  h = record(x$foo, node_data=TRUE)
   expect_equal(h, g)
 })
 
 test_that("record access of S4 slot", {
   g = wiring_diagram()
-  add_node(g, "character:1", list(), ret)
-  add_node(g, "@:1", c("1","2"), ret)
+  add_node(g, "character:1", list(), ret, list(kind="literal"))
+  add_node(g, "@:1", c("1","2"), ret, list(
+    kind="slot", `function`="@", package="base"))
   add_edge(g, "character:1", "@:1", ret, "2")
   
   ExampleClass = setClass("ExampleClass", representation(name="character"))
   ex = ExampleClass(name="foo")
-  h = record(ex@name)
+  h = record(ex@name, node_data=TRUE)
   expect_equal(h, g)
 })
 
