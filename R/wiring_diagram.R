@@ -66,20 +66,28 @@ wire_data <- R6Class("wire_data",
 #' @rdname wiring_diagram
 #' @export
 input_node <- function(g) UseMethod("input_node")
+
+#' @export
 input_node.wiring_diagram <- function(g) g$input_node
 
 #' @rdname wiring_diagram
 #' @export
 output_node <- function(g) UseMethod("output_node")
+
+#' @export
 output_node.wiring_diagram <- function(g) g$output_node
 
+#' @export
 nnodes.wiring_diagram <- function(g) nnodes.multigraph(g) - 2
+
+#' @export
 nodes.wiring_diagram <- function(g) {
   skip = c(input_node(g), output_node(g))
   discard(nodes.multigraph(g), function(n) n %in% skip)
 }
 
 #' @rdname wiring_diagram
+#' @export
 add_node.wiring_diagram <- function(g, node, input_ports=list(),
                                     output_ports=list(), data=list()) {
   add_node.multigraph(g, node, box_data$new(input_ports, output_ports, data))
@@ -88,6 +96,8 @@ add_node.wiring_diagram <- function(g, node, input_ports=list(),
 #' @rdname wiring_diagram
 #' @export
 input_ports <- function(g, node=NULL) UseMethod("input_ports")
+
+#' @export
 input_ports.wiring_diagram <- function(g, node=NULL) {
   keys(graph_or_node_data(g, node)$input_ports)
 }
@@ -95,6 +105,8 @@ input_ports.wiring_diagram <- function(g, node=NULL) {
 #' @rdname wiring_diagram
 #' @export
 `input_ports<-` <- function(g, node=NULL, value) UseMethod("input_ports<-")
+
+#' @export
 `input_ports<-.wiring_diagram` <- function(g, node=NULL, value) {
   data = graph_or_node_data(g, node)
   data$input_ports = coerce_ports(value)
@@ -104,6 +116,8 @@ input_ports.wiring_diagram <- function(g, node=NULL) {
 #' @rdname wiring_diagram
 #' @export
 output_ports <- function(g, node=NULL) UseMethod("output_ports")
+
+#' @export
 output_ports.wiring_diagram <- function(g, node=NULL) {
   keys(graph_or_node_data(g, node)$output_ports)
 }
@@ -111,6 +125,8 @@ output_ports.wiring_diagram <- function(g, node=NULL) {
 #' @rdname wiring_diagram
 #' @export
 `output_ports<-` <- function(g, node=NULL, value) UseMethod("output_ports<-")
+
+#' @export
 `output_ports<-.wiring_diagram` <- function(g, node=NULL, value) {
   data = graph_or_node_data(g, node)
   data$output_ports = coerce_ports(value)
@@ -131,6 +147,7 @@ coerce_ports <- function(ports) {
 }
 
 #' @rdname wiring_diagram
+#' @export
 add_edge.wiring_diagram <- function(g, src, tgt, src_port, tgt_port, data=list()) {
   add_edge.multigraph(g, src, tgt, wire_data$new(src_port, tgt_port, data))
 }
@@ -138,6 +155,8 @@ add_edge.wiring_diagram <- function(g, src, tgt, src_port, tgt_port, data=list()
 #' @rdname wiring_diagram
 #' @export
 source_port <- function(g, src, tgt, ind) UseMethod("source_port")
+
+#' @export
 source_port.wiring_diagram <- function(g, src, tgt, ind) {
   edge_data.multigraph(g, src, tgt, ind)$source_port
 }
@@ -145,31 +164,44 @@ source_port.wiring_diagram <- function(g, src, tgt, ind) {
 #' @rdname wiring_diagram
 #' @export
 target_port <- function(g, src, tgt, ind) UseMethod("target_port")
+
+#' @export
 target_port.wiring_diagram <- function(g, src, tgt, ind) {
   edge_data.multigraph(g, src, tgt, ind)$target_port
 }
 
+# Graph data
+
+#' @export
 graph_data.wiring_diagram <- function(g) {
   graph_data.multigraph(g)$data
 }
+
+#' @export
 `graph_data<-.wiring_diagram` <- function(g, value) {
   data = graph_data.multigraph(g)
   data$data <- value
   g
 }
 
+#' @export
 node_data.wiring_diagram <- function(g, node) {
   node_data.multigraph(g, node)$data
 }
+
+#' @export
 `node_data<-.wiring_diagram` <- function(g, node, value) {
   data = node_data.multigraph(g, node)
   data$data <- value
   g
 }
 
+#' @export
 edge_data.wiring_diagram <- function(g, src, tgt, ind) {
   edge_data.multigraph(g, src, tgt, ind)$data
 }
+
+#' @export
 `edge_data<-.wiring_diagram` <- function(g, src, tgt, ind, value) {
   data = edge_data.multigraph(g, src, tgt, ind)
   data$data <- value
@@ -188,6 +220,8 @@ NULL
 #' @rdname wiring_diagram_data
 #' @export
 input_port_data <- function(g, node, port) UseMethod("input_port_data")
+
+#' @export
 input_port_data.wiring_diagram <- function(g, node, port) {
   graph_or_node_data(g, node)$input_ports[[port]]
 }
@@ -196,6 +230,8 @@ input_port_data.wiring_diagram <- function(g, node, port) {
 #' @export
 `input_port_data<-` <- function(g, node, port, value)
   UseMethod("input_port_data<-")
+
+#' @export
 `input_port_data<-.wiring_diagram` <- function(g, node, port, value) {
   data = graph_or_node_data(g, node)$input_ports
   data[[port]] <- value
@@ -205,6 +241,8 @@ input_port_data.wiring_diagram <- function(g, node, port) {
 #' @rdname wiring_diagram_data
 #' @export
 input_port_attr <- function(g, node, port, key) UseMethod("input_port_attr")
+
+#' @export
 input_port_attr.wiring_diagram <- function(g, node, port, key) {
   graph_or_node_data(g, node)$input_ports[[port]][[key]]
 }
@@ -213,6 +251,8 @@ input_port_attr.wiring_diagram <- function(g, node, port, key) {
 #' @export
 `input_port_attr<-` <- function(g, node, port, key, value)
   UseMethod("input_port_attr<-")
+
+#' @export
 `input_port_attr<-.wiring_diagram` <- function(g, node, port, key, value) {
   data = graph_or_node_data(g, node)$input_ports
   data[[port]][[key]] = value
@@ -222,6 +262,8 @@ input_port_attr.wiring_diagram <- function(g, node, port, key) {
 #' @rdname wiring_diagram_data
 #' @export
 output_port_data <- function(g, node, port) UseMethod("output_port_data")
+
+#' @export
 output_port_data.wiring_diagram <- function(g, node, port) {
   graph_or_node_data(g, node)$output_ports[[port]]
 }
@@ -230,6 +272,8 @@ output_port_data.wiring_diagram <- function(g, node, port) {
 #' @export
 `output_port_data<-` <- function(g, node, port, value)
   UseMethod("output_port_data<-")
+
+#' @export
 `output_port_data<-.wiring_diagram` <- function(g, node, port, value) {
   data = graph_or_node_data(g, node)$output_ports
   data[[port]] <- value
@@ -239,6 +283,8 @@ output_port_data.wiring_diagram <- function(g, node, port) {
 #' @rdname wiring_diagram_data
 #' @export
 output_port_attr <- function(g, node, port, key) UseMethod("output_port_attr")
+
+#' @export
 output_port_attr.wiring_diagram <- function(g, node, port, key) {
   graph_or_node_data(g, node)$output_ports[[port]][[key]]
 }
@@ -247,6 +293,8 @@ output_port_attr.wiring_diagram <- function(g, node, port, key) {
 #' @export
 `output_port_attr<-` <- function(g, node, port, key, value)
   UseMethod("output_port_attr<-")
+
+#' @export
 `output_port_attr<-.wiring_diagram` <- function(g, node, port, key, value) {
   data = graph_or_node_data(g, node)$output_ports
   data[[port]][[key]] = value

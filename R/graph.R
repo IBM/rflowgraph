@@ -50,6 +50,8 @@ add_node <- function(g, node, ...) UseMethod("add_node")
 #' @rdname graph
 #' @export
 add_nodes <- function(g, nodes) UseMethod("add_nodes")
+
+#' @export
 add_nodes.default <- function(g, nodes) {
   for (node in nodes)
     add_node(g, node)
@@ -77,16 +79,22 @@ rem_edge <- function(g, src, tgt, ...) UseMethod("rem_edge")
 
 #' @rdname graph
 neighbors <- function(g, node) UseMethod("neighbors")
+
+#' @export
 neighbors.default <- function(g, node) successors(g, node)
 
 #' @rdname graph
 #' @export
 successors <- function(g, node) UseMethod("successors")
+
+#' @export
 successors.default <- function(g, node) neighbors(g, node)
 
 #' @rdname graph
 #' @export
 predecessors <- function(g, node) UseMethod("predecessors")
+
+#' @export
 predecessors.default <- function(g, node) neighbors(g, node)
 
 #' Graph data
@@ -104,11 +112,15 @@ graph_data <- function(g) UseMethod("graph_data")
 #' @rdname graph_data
 #' @export
 graph_attr <- function(g, key) UseMethod("graph_attr")
+
+#' @export
 graph_attr.default <- function(g, key) graph_data(g)[[key]]
 
 #' @rdname graph_data
 #' @export
 `graph_attr<-` <- function(g, key, value) UseMethod("graph_attr<-")
+
+#' @export
 `graph_attr<-.default` <- function(g, key, value) {
   graph_data(g)[[key]] <- value
   g
@@ -125,11 +137,15 @@ node_data <- function(g, node) UseMethod("node_data")
 #' @rdname graph_data
 #' @export
 node_attr <- function(g, node, key) UseMethod("node_attr")
+
+#' @export
 node_attr.default <- function(g, node, key) node_data(g, node)[[key]]
 
 #' @rdname graph_data
 #' @export
 `node_attr<-` <- function(g, node, key, value) UseMethod("node_attr<-")
+
+#' @export
 `node_attr<-.default` <- function(g, node, key, value) {
   node_data(g, node)[[key]] <- value
   g
@@ -146,19 +162,26 @@ edge_data <- function(g, src, tgt, ...) UseMethod("edge_data")
 #' @rdname graph_data
 #' @export
 edge_attr <- function(g, src, tgt, ..., key) UseMethod("edge_attr")
+
+#' @export
 edge_attr.default <- function(g, src, tgt, key) edge_data(g, src, tgt)[[key]]
 
 #' @rdname graph_data
 #' @export
 `edge_attr<-` <- function(g, src, tgt, ..., key, value) UseMethod("edge_attr<-")
+
+#' @export
 `edge_attr<-.default` <- function (g, src, tgt, key, value) {
   edge_data(g, src, tgt)[[key]] <- value
   g
 }
 
+#' @export
 print.graph <- function(g, ...) {
   cat(class(g)[[1]], "with", nnodes(g), "nodes and", nedges(g), "edges")
 }
+
+#' @export
 print.edge <- function(e, ...) {
   cat(class(e)[[1]], "(", e$src, " => ", e$tgt, ")", sep="")
 }
