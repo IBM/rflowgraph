@@ -105,6 +105,22 @@ test_that("record access of S4 slot", {
   expect_equal(h, g)
 })
 
+test_that("record definition and call of user function", {
+  # TODO: Record inside user-defined function.
+  g = wiring_diagram()
+  add_node(g, "numeric:1", list(), ret)
+  add_node(g, "numeric:2", list(), ret)
+  add_node(g, "f:1", c("x","y"), ret)
+  add_edge(g, "numeric:1", "f:1", ret, "x")
+  add_edge(g, "numeric:2", "f:1", ret, "y")
+  
+  h = record({
+    f <- function(x, y) x+y
+    f(1,1)
+  })
+  expect_equal(h, g)
+})
+
 test_that("record and store node data", {
   g = wiring_diagram()
   add_node(g, "numeric:1", list(), ret, list(kind="literal"))

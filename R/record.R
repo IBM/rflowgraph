@@ -149,7 +149,8 @@ record_call <- function(call, state, index=NULL) {
   }
   else if (full_name == "base::function") {
     # Function definition.
-    stop("Not implemented: recording function definition")
+    # TODO: Record inside user functions.
+    return(state$eval(call))
   }
   
   # Prepare to evaluate function call.
@@ -179,6 +180,7 @@ record_call <- function(call, state, index=NULL) {
   observed = call_state$observed_args()
   
   # Create or retrieve node for call.
+  c(node, out_port) %<-% list(NULL, return_port)
   if (name == "(" || name == "{") {
     # Special case: Don't create nodes for parentheses and braces,
     # which are represented as calls in R.
@@ -188,9 +190,12 @@ record_call <- function(call, state, index=NULL) {
   else if (full_name %in% ASSIGN_FUNS) {
     # Special case: Don't create nodes for assignments, but do update the
     # output table.
-    c(node, out_port) %<-% observed[[1]]$source
-    varname = as.character(call[[2]])
-    graph_state$output_table[[varname]] = list(node,out_port)
+    rhs = observed[[1]]
+    if (!rlang::is_missing(rhs)) {
+      c(node, out_port) %<-% rhs$source
+      varname = as.character(call[[2]])
+      graph_state$output_table[[varname]] = list(node,out_port)
+    }
   }
   else {
     # Match arguments to call, replacing missing names with numbers.
@@ -218,7 +223,7 @@ record_call <- function(call, state, index=NULL) {
   }
   
   # Attach call value to node.
-  graph_state$observe(index, list(node,return_port), value)
+  graph_state$observe(index, list(node,out_port), value)
   
   return(value)
 }
