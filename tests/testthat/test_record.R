@@ -24,6 +24,7 @@ test_that("record literal values", {
   g = wiring_diagram()
   add_node(g, "formula:1", list(), ret)
   expect_equal(record(y~x-1), g)
+  expect_equal(record(~.), g)
 })
 
 test_that("record trivial arithemetic expression", {

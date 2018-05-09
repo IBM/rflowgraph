@@ -12,6 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#' Get function from a call
+#' 
+#' @description Get the function from a named or namespaced call.
+call_fun <- function(call, env=rlang::caller_env()) {
+  stopifnot(is.call(call))
+  if (call[[1]] == quote(`~`))
+    # XXX: rlang::lang_type_of(~.) chokes, so handle this case specially.
+    return(`~`)
+  rlang::call_fn(call, env)
+}
+
 #' Class system
 #' 
 #' @description Which class system does the object or function use?
@@ -108,7 +119,7 @@ fun_package <- function(f) {
 match_call <- function(call, env=rlang::caller_env(), fun=NULL) {
   stopifnot(is.call(call))
   if (is.null(fun))
-    fun = rlang::call_fn(call, env)
+    fun = call_fun(call, env)
   
   if (is.primitive(fun)) {
     # Fall back to our reimplementation of R's algorithm for argument matching.
@@ -164,10 +175,11 @@ match_call_ <- function(fun, call) {
 inspect_call <- function(call, env=rlang::caller_env(), fun=NULL) {
   stopifnot(is.call(call))
   if (is.null(fun))
-    fun = rlang::call_fn(call, env)
+    fun = call_fun(call, env)
   
   head = call[[1]]
-  rlang::switch_lang(call, named = {
+  lang_type = if (head == quote(`~`)) "named" else rlang::lang_type_of(call)
+  switch(lang_type, named = {
     pkg = fun_package(fun)
     name = as.character(head)
   }, namespaced = {

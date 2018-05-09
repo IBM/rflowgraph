@@ -133,7 +133,7 @@ record_name <- function(name, state, index=NULL) {
 
 record_call <- function(call, state, index=NULL) {
   # Get information about function: name, package, etc.
-  fun = rlang::call_fn(call, state$options$env)
+  fun = call_fun(call, state$options$env)
   call_info = inspect_call(call, fun=fun)
   name = call_info$name
   full_name = paste(call_info$package, name, sep="::")
