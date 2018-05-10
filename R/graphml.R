@@ -20,8 +20,10 @@
 #' @export
 read_graphml <- function(xml, graph=NULL) {
   # Read XML document and top-level elements.
-  if (!("xml_document" %in% class(xml)))
+  if (!("xml_document" %in% class(xml))) {
     xml = read_xml(xml)
+    xml_ns_strip(xml)
+  }
   if (xml_name(xml) != "graphml")
     stop("Root element of GraphML document must be <graphml>")
   xgraphs = xml_find_all(xml, "graph")
