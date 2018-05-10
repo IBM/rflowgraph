@@ -83,3 +83,9 @@ test_that("annotate slot access in flow graph", {
   h = record(htest$p.value, data=TRUE, values=FALSE) %>% annotate(db=db)
   expect_equal(h, g)
 })
+
+test_that("annotate is idempotent", {
+  g = record(1+1, data=TRUE, values=FALSE) %>% annotate(db=db)
+  h = record(1+1, data=TRUE, values=FALSE) %>% annotate(db=db) %>% annotate(db=db)
+  expect_equal(h, g)
+})

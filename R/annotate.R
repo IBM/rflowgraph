@@ -109,11 +109,9 @@ annotate_literal <- function(annotator, g, node) {
   key = annotate_port(annotator, output_port_data(g, node, return_port))
   if (is.null(key)) return()
   
+  node_attr(g, node, "annotation") <- key
+  node_attr(g, node, "annotation_kind") <- "construct"
   output_port_attr(g, node, return_port, "annotation_index") <- 1L
-  node_data(g, node) <- c(node_data(g, node), list(
-    annotation = key,
-    annotation_kind = "construct"
-  ))
 }
 
 annotate_slot <- function(annotator, g, node) {
@@ -127,11 +125,9 @@ annotate_slot <- function(annotator, g, node) {
   i = detect_index(slots, ~ .$slot == slot)
   if (i == 0L) return()
   
-  node_data(g, node) <- c(node_data(g, node), list(
-    annotation = key,
-    annotation_kind = "slot",
-    annotation_index = i
-  ))
+  node_attr(g, node, "annotation") <- key
+  node_attr(g, node, "annotation_kind") <- "slot"
+  node_attr(g, node, "annotation_index") <- i
 }
 
 annotate_port <- function(annotator, data) {
