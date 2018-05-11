@@ -46,9 +46,13 @@ multiedge <- function(src, tgt, ind) {
             class=c("multiedge", "edge"))
 }
 
+#' @export
 is_directed.multigraph <- function(g) TRUE
 
+#' @export
 nodes.multigraph <- function(g) keys(g$nodes)
+
+#' @export
 edges.multigraph <- function(g, src, tgt) {
   if (missing(src) && missing(tgt)) {
     flatten(map(keys(g$succ), function(src) {
@@ -62,7 +66,10 @@ edges.multigraph <- function(g, src, tgt) {
   }
 }
 
+#' @export
 nnodes.multigraph <- function(g) length(g$nodes)
+
+#' @export
 nedges.multigraph <- function(g, src, tgt) {
   if (missing(src) && missing(tgt)) {
     sum(map_int(values(g$succ), function(succ) {
@@ -73,9 +80,13 @@ nedges.multigraph <- function(g, src, tgt) {
   }
 }
 
+#' @export
 has_node.multigraph <- function(g, n) has_key(g$nodes, n)
+
+#' @export
 has_edge.multigraph <- function(g, src, tgt) has_key(g$succ[[src]], tgt)
 
+#' @export
 add_node.multigraph <- function(g, n, data=list()) {
   if (has_key(g$nodes, n))
     stop("node already exists: ", n)
@@ -85,6 +96,7 @@ add_node.multigraph <- function(g, n, data=list()) {
   NULL
 }
 
+#' @export
 rem_node.multigraph <- function(g, n) {
   stopifnot(has_node(g, n))
   del(g$nodes, n)
@@ -96,6 +108,7 @@ rem_node.multigraph <- function(g, n) {
   del(g$pred, n)
 }
 
+#' @export
 add_edge.multigraph <- function(g, src, tgt, data=list()) {
   stopifnot(has_node(g, src) && has_node(g, tgt))
   succ = g$succ[[src]]
@@ -105,6 +118,7 @@ add_edge.multigraph <- function(g, src, tgt, data=list()) {
   length(succ[[tgt]] <- c(edges, list(data)))
 }
 
+#' @export
 rem_edge.multigraph <- function(g, src, tgt, ind) {
   edges = edges(g, src, tgt)
   if (missing(ind))
@@ -121,32 +135,47 @@ rem_edge.multigraph <- function(g, src, tgt, ind) {
   ind
 }
 
+#' @export
 successors.multigraph <- function(g, node) keys(g$succ[[node]])
+
+#' @export
 predecessors.multigraph <- function(g, node) keys(g$pred[[node]])
-  
+ 
+#' @export 
 graph_data.multigraph <- function(g) g$data
+
+#' @export
 `graph_data<-.multigraph` <- function(g, value) {
   g$data <- value
   g
 }
 
+#' @export
 node_data.multigraph <- function(g, n) g$nodes[[n]]
+
+#' @export
 `node_data<-.multigraph` <- function(g, n, value) {
   stopifnot(has_node(g, n))
   g$nodes[[n]] <- value
   g
 }
 
+#' @export
 edge_data.multigraph <- function(g, src, tgt, ind) g$succ[[src]][[tgt]][[ind]]
+
+#' @export
 `edge_data<-.multigraph` <- function(g, src, tgt, ind, value) {
   stopifnot(nedges(g, src, tgt) >= ind)
   g$succ[[src]][[tgt]][[ind]] <- value
   g
 }
 
+#' @export
 edge_attr.multigraph <- function(g, src, tgt, ind, key) {
   edge_data(g, src, tgt, ind)[[key]]
 }
+
+#' @export
 `edge_attr<-.multigraph` <- function(g, src, tgt, ind, key, value) {
   edge_data(g, src, tgt, ind)[[key]] <- value
   g
