@@ -17,10 +17,28 @@
 #' @description Get the function from a named or namespaced call.
 call_fun <- function(call, env=rlang::caller_env()) {
   stopifnot(is.call(call))
-  if (call[[1]] == quote(`~`))
-    # XXX: rlang::lang_type_of(~.) chokes, so handle this case specially.
-    return(`~`)
-  rlang::call_fn(call, env)
+  if (rlang::is_formula(call))
+    # XXX: rlang::lang_type_of(~.) chokes (see `call_type_of`).
+    `~`
+  else
+    rlang::call_fn(call, env)
+}
+
+#' Get type of a call
+#' 
+#' @description Get the type ("named", "namespaced", "recursive", or "inlined") 
+#' of a function call.
+#' 
+#' @seealso \code{rlang::lang_type_of}
+call_type_of <- function(call) {
+  stopifnot(is.call(call))
+  if (rlang::is_formula(call))
+    # XXX: rlang::lang_type_of can fail on formulas:
+    #   https://github.com/r-lib/rlang/issues/515
+    # Worse, the maintainers have no intention of fixing this bug.
+    "named"
+  else
+    rlang::lang_type_of(call)
 }
 
 #' Class system
@@ -178,8 +196,7 @@ inspect_call <- function(call, env=rlang::caller_env(), fun=NULL) {
     fun = call_fun(call, env)
   
   head = call[[1]]
-  lang_type = if (head == quote(`~`)) "named" else rlang::lang_type_of(call)
-  switch(lang_type, named = {
+  switch(call_type_of(call), named = {
     pkg = fun_package(fun)
     name = as.character(head)
   }, namespaced = {
