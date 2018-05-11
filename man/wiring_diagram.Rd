@@ -10,6 +10,8 @@
 \alias{output_ports}
 \alias{output_ports<-}
 \alias{add_edge.wiring_diagram}
+\alias{edges.wiring_diagram}
+\alias{nedges.wiring_diagram}
 \alias{source_port}
 \alias{target_port}
 \title{Wiring diagrams}
@@ -33,6 +35,10 @@ output_ports(g, node) <- value
 
 \method{add_edge}{wiring_diagram}(g, src, tgt, src_port, tgt_port,
   data = list())
+
+\method{edges}{wiring_diagram}(g, src, tgt, src_port, tgt_port)
+
+\method{nedges}{wiring_diagram}(g, src, tgt, src_port, tgt_port)
 
 source_port(g, src, tgt, ind)
 

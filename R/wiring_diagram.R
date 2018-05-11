@@ -154,6 +154,32 @@ add_edge.wiring_diagram <- function(g, src, tgt, src_port, tgt_port, data=list()
 
 #' @rdname wiring_diagram
 #' @export
+edges.wiring_diagram <- function(g, src, tgt, src_port, tgt_port) {
+  if (missing(src) && missing(tgt)) {
+    edges.multigraph(g)
+  } else {
+    edges = edges.multigraph(g, src, tgt)
+    if (!missing(src_port))
+      edges = keep(edges, ~ source_port(g,.) == src_port)
+    if (!missing(tgt_port))
+      edges = keep(edges, ~ target_port(g,.) == tgt_port)
+    edges
+  }
+}
+
+#' @rdname wiring_diagram
+#' @export
+nedges.wiring_diagram <- function(g, src, tgt, src_port, tgt_port) {
+  if (missing(src) && missing(tgt))
+    nedges.multigraph(g)
+  else if (missing(src_port) && missing(tgt_port))
+    nedges.multigraph(g, src, tgt)
+  else
+    length(edges(g, src, tgt, src_port, tgt_port))
+}
+
+#' @rdname wiring_diagram
+#' @export
 source_port <- function(g, src, tgt, ind) UseMethod("source_port")
 
 #' @export

@@ -45,6 +45,14 @@ test_that("add boxes and wires in a wiring diagram", {
   expect_equal(target_port(g, input_node(g), "foo", 1), "w1")
   expect_equal(source_port(g, "foo", output_node(g), 2), "z2")
   expect_equal(target_port(g, "foo", output_node(g), 2), "y2")
+  
+  expect_equal(edges(g, input_node(g), "foo"),
+               list(multiedge(input_node(g), "foo", 1L),
+                    multiedge(input_node(g), "foo", 2L)))
+  expect_equal(nedges(g, input_node(g), "foo"), 2)
+  expect_equal(edges(g, input_node(g), "foo", "x1", "w1"),
+               list(multiedge(input_node(g), "foo", 1L)))
+  expect_equal(nedges(g, input_node(g), "foo", "x1", "w1"), 1)
 })
 
 test_that("get and set graph/node/port/edge attributes in a wiring diagram", {
