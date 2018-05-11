@@ -95,7 +95,7 @@ add_node.wiring_diagram <- function(g, node, input_ports=list(),
 
 #' @rdname wiring_diagram
 #' @export
-input_ports <- function(g, node=NULL) UseMethod("input_ports")
+input_ports <- function(g, node) UseMethod("input_ports")
 
 #' @export
 input_ports.wiring_diagram <- function(g, node=NULL) {
@@ -104,7 +104,7 @@ input_ports.wiring_diagram <- function(g, node=NULL) {
 
 #' @rdname wiring_diagram
 #' @export
-`input_ports<-` <- function(g, node=NULL, value) UseMethod("input_ports<-")
+`input_ports<-` <- function(g, node, value) UseMethod("input_ports<-")
 
 #' @export
 `input_ports<-.wiring_diagram` <- function(g, node=NULL, value) {
@@ -115,7 +115,7 @@ input_ports.wiring_diagram <- function(g, node=NULL) {
 
 #' @rdname wiring_diagram
 #' @export
-output_ports <- function(g, node=NULL) UseMethod("output_ports")
+output_ports <- function(g, node) UseMethod("output_ports")
 
 #' @export
 output_ports.wiring_diagram <- function(g, node=NULL) {
@@ -124,7 +124,7 @@ output_ports.wiring_diagram <- function(g, node=NULL) {
 
 #' @rdname wiring_diagram
 #' @export
-`output_ports<-` <- function(g, node=NULL, value) UseMethod("output_ports<-")
+`output_ports<-` <- function(g, node, value) UseMethod("output_ports<-")
 
 #' @export
 `output_ports<-.wiring_diagram` <- function(g, node=NULL, value) {
@@ -157,18 +157,14 @@ add_edge.wiring_diagram <- function(g, src, tgt, src_port, tgt_port, data=list()
 source_port <- function(g, src, tgt, ind) UseMethod("source_port")
 
 #' @export
-source_port.wiring_diagram <- function(g, src, tgt, ind) {
-  edge_data.multigraph(g, src, tgt, ind)$source_port
-}
+source_port.wiring_diagram <- function(...) edge_data.multigraph(...)$source_port
 
 #' @rdname wiring_diagram
 #' @export
 target_port <- function(g, src, tgt, ind) UseMethod("target_port")
 
 #' @export
-target_port.wiring_diagram <- function(g, src, tgt, ind) {
-  edge_data.multigraph(g, src, tgt, ind)$target_port
-}
+target_port.wiring_diagram <- function(...) edge_data.multigraph(...)$target_port
 
 # Graph data
 
@@ -197,9 +193,7 @@ node_data.wiring_diagram <- function(g, node) {
 }
 
 #' @export
-edge_data.wiring_diagram <- function(g, src, tgt, ind) {
-  edge_data.multigraph(g, src, tgt, ind)$data
-}
+edge_data.wiring_diagram <- function(...) edge_data.multigraph(...)$data
 
 #' @export
 `edge_data<-.wiring_diagram` <- function(g, src, tgt, ind, value) {

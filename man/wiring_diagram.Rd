@@ -23,13 +23,13 @@ output_node(g)
 \method{add_node}{wiring_diagram}(g, node, input_ports = list(),
   output_ports = list(), data = list())
 
-input_ports(g, node = NULL)
+input_ports(g, node)
 
-input_ports(g, node = NULL) <- value
+input_ports(g, node) <- value
 
-output_ports(g, node = NULL)
+output_ports(g, node)
 
-output_ports(g, node = NULL) <- value
+output_ports(g, node) <- value
 
 \method{add_edge}{wiring_diagram}(g, src, tgt, src_port, tgt_port,
   data = list())

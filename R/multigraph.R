@@ -161,7 +161,11 @@ node_data.multigraph <- function(g, n) g$nodes[[n]]
 }
 
 #' @export
-edge_data.multigraph <- function(g, src, tgt, ind) g$succ[[src]][[tgt]][[ind]]
+edge_data.multigraph <- function(g, src, tgt, ind) {
+  if (is(src, "multiedge"))
+    c(src, tgt, ind) %<-% unclass(src)
+  g$succ[[src]][[tgt]][[ind]]
+}
 
 #' @export
 `edge_data<-.multigraph` <- function(g, src, tgt, ind, value) {
