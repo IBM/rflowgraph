@@ -32,6 +32,9 @@
 #' @export
 annotate <- function(g, db=NULL, nodes=TRUE, ports=TRUE) {
   annotator = annotator$new(db)
+  
+  # Load package annotations, if not already loaded.
+  #
   # Note: Because the nodes in a wiring diagram are ordered, the nodes will be
   # traversed in order of recording (which is also a topological ordering).
   # Thus package annotations will be loaded in order of package use,
@@ -43,13 +46,14 @@ annotate <- function(g, db=NULL, nodes=TRUE, ports=TRUE) {
   # no reliable strategy to disambiguate anyway, only heuristics. For now
   # we just punt on the whole issue.
   for (node in nodes(g)) {
-    # Load annotations for package, if not already loaded.
     package = node_attr(g, node, "package")
     if (!is.null(package))
       annotator$load_package(package)
-    
-    # Annotate input and output ports of node.
-    if (ports) {
+  }
+  
+  # Annotate input and output ports.
+  if (ports) {
+    for (node in nodes(g)) {
       for (port in input_ports(g, node)) {
         key = annotate_port(annotator, input_port_data(g, node, port))
         if (!is.null(key))
@@ -61,10 +65,13 @@ annotate <- function(g, db=NULL, nodes=TRUE, ports=TRUE) {
           output_port_attr(g, node, port, "annotation") <- key
       }
     }
+  }
     
-    # Annotate the node itself.
-    if (nodes)
+  # Annotate nodes, possibly overriding the default port annotations.
+  if (nodes) {
+    for (node in nodes(g)) {
       annotate_node(annotator, g, node)
+    }
   }
   g
 }
@@ -95,18 +102,26 @@ annotate_function <- function(annotator, g, node) {
   note = annotator$annotation(key)
   align_ports(input_ports(g, node), note$domain) %>%
     iwalk(function(port, i) {
-      if (!is.na(port))
-        input_port_attr(g, node, port, "annotation_index") <- i
+      if (is.na(port)) return()
+      input_port_attr(g, node, port, "annotation_index") <- i
     })
   align_ports(output_ports(g, node), note$codomain) %>%
     iwalk(function(port, i) {
-      if (!is.na(port))
-        output_port_attr(g, node, port, "annotation_index") <- i
+      if (is.na(port)) return()
+      key = note$codomain[[i]]$annotate
+      if (!is.null(key)) {
+        output_port_attr(g, node, port, "annotation") <- key
+        for (succ in successors(g, node)) {
+          for (edge in edges(g, node, succ, port))
+            input_port_attr(g, succ, target_port(g, edge), "annotation") <- key
+        }
+      }
+      output_port_attr(g, node, port, "annotation_index") <- i
     })
 }
 
 annotate_literal <- function(annotator, g, node) {
-  key = annotate_port(annotator, output_port_data(g, node, return_port))
+  key = output_port_attr(g, node, return_port, "annotation")
   if (is.null(key)) return()
   
   node_attr(g, node, "annotation") <- key
@@ -116,7 +131,7 @@ annotate_literal <- function(annotator, g, node) {
 
 annotate_slot <- function(annotator, g, node) {
   first_port = input_ports(g, node)[[1]]
-  key = annotate_port(annotator, input_port_data(g, node, first_port))
+  key = input_port_attr(g, node, first_port, "annotation")
   if (is.null(key)) return()
   
   note = annotator$annotation(key)

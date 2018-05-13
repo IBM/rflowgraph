@@ -68,6 +68,27 @@
     ]
   },
   {
+    "_id": "annotation/r/base/summary",
+    "schema": "annotation",
+    "language": "r",
+    "package": "base",
+    "id": "summary",
+    "kind": "morphism",
+    "function": "summary",
+    "definition": "summarize",
+    "domain": [
+      {
+        "slot": "object"
+      }
+    ],
+    "codomain": [
+      {
+        "slot": "__return__",
+        "annotate": "r/base/summary-object"
+      }
+    ]
+  },
+  {
     "_id": "annotation/r/stats/htest",
     "schema": "annotation",
     "language": "r",
