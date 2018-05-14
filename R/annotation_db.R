@@ -135,11 +135,12 @@ remote_annotation_db <- R6Class("remote_annotation_db",
       ))
       self$load_documents(result$docs)
     },
-    load_package = function(package) {
+    load_packages = function(pkgs) {
+      pkgs = as.list(pkgs)
       result = sofa::db_query(private$cushion, private$dbname, selector=list(
         schema = "annotation",
         language = "r",
-        package = package
+        package = if (length(pkgs) == 1) pkgs[[1]] else list(`$in` = pkgs)
       ))
       self$load_documents(result$docs)
     }

@@ -38,7 +38,7 @@ test_that("annotations are loaded from the remote DB", {
   expect_true("stats" %in% packages)
   expect_false("sklearn" %in% packages)
   
-  db$load_package("base")
+  db$load_packages("base")
   note = db$annotation("r/base/data-frame")
   expect_equal(note$class, "data.frame")
   

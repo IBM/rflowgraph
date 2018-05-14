@@ -31,25 +31,16 @@
 #' @seealso \code{\link{record}}
 #' @export
 annotate <- function(g, db=NULL, nodes=TRUE, ports=TRUE) {
-  annotator = annotator$new(db)
-  
   # Load package annotations, if not already loaded.
   #
-  # Note: Because the nodes in a wiring diagram are ordered, the nodes will be
-  # traversed in order of recording (which is also a topological ordering).
-  # Thus package annotations will be loaded in order of package use,
-  # not package loading through `library` or `require`.
-  # 
-  # This difference can affect the final result only for object annotations,
-  # where packages cannot be assigned to classes due to R's informal class 
-  # system. But when S3 class names conflict among loaded packages, there is
-  # no reliable strategy to disambiguate anyway, only heuristics. For now
-  # we just punt on the whole issue.
-  for (node in nodes(g)) {
-    package = node_attr(g, node, "package")
-    if (!is.null(package))
-      annotator$load_package(package)
-  }
+  # Note: Packages cannot be assigned to classes due to R's informal class
+  # system. When S3 class names conflict among loaded packages, there is
+  # no reliable strategy to disambiguate them. In this case, which annotation
+  # is selected is undefined.
+  packages = nodes(g) %>% map(function(node) node_attr(g, node, "package")) %>%
+    compact() %>% unique()
+  annotator = annotator$new(db)
+  annotator$load_packages(packages)
   
   # Annotate input and output ports.
   if (ports) {
@@ -68,6 +59,8 @@ annotate <- function(g, db=NULL, nodes=TRUE, ports=TRUE) {
   }
     
   # Annotate nodes, possibly overriding the default port annotations.
+  # Note: Because the nodes in a wiring diagram are ordered, the nodes will be
+  # traversed in order of recording (which is also a topological ordering).
   if (nodes) {
     for (node in nodes(g)) {
       annotate_node(annotator, g, node)

@@ -31,7 +31,6 @@ annotator <- R6Class("annotator",
       if (inherits(db, "remote_annotation_db")) {
         for (package in db$list_packages())
           loaded[[package]] = FALSE
-        self$load_package("base")
       }
     },
     annotation = function(...) private$db$annotation(...),
@@ -86,11 +85,13 @@ annotator <- R6Class("annotator",
         }
       }
     },
-    load_package = function(package) {
+    load_packages = function(pkgs) {
       loaded = private$loaded
-      if (!get_default(loaded, package, TRUE)) {
-        private$db$load_package(package)
-        loaded[[package]] = TRUE
+      pkgs = discard(pkgs, function(pkg) get_default(loaded, pkg, TRUE))
+      if (!is_empty(pkgs)) {
+        private$db$load_packages(pkgs)
+        for (pkg in pkgs)
+          loaded[[pkg]] = TRUE
       }
     }
   ),
