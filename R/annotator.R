@@ -34,22 +34,27 @@ annotator <- R6Class("annotator",
       }
     },
     annotation = function(...) private$db$annotation(...),
-    annotate_call = function(call, env=rlang::caller_env()) {
-      info = inspect_call(call, env)
-      self$annotate_function(info$name, info$package)
-    },
-    annotate_function = function(name, pkg) {
-      # Query DB for annotations matching package and function name.
+    annotate_function = function(name, package, class=NULL, system=NULL) {
+      # Query DB for any annotations matching package and function.
       db = private$db
       match = db$tbl() %>%
-        dplyr::filter(kind=="morphism", package==pkg, `function`==name) %>%
+        dplyr::filter(kind == "morphism",
+                      package == !! package, `function` == name) %>%
         dplyr::collect()
-      if (nrow(match) > 0) {
-        if (nrow(match) > 1) {
-          warning("Multiple annotations match function: ", pkg, "::", name)
-        }
-        match[[1,"key"]]
+      
+      # First, try to match a method.
+      class_na = is.na(match$class)
+      if (!(all(class_na) || is.null(class))) {
+        key = match[!class_na,] %>%
+          private$filter_best_class(class, system) %>%
+          private$select_first()
+        if (!is.null(key))
+          return(key)
       }
+      
+      # If that fails, try to match an ordinary function.
+      match[class_na,] %>%
+        private$select_first()
     },
     annotate_object = function(x) {
       # Ideally, we would filter by package but it's generally not possible
@@ -66,25 +71,14 @@ annotator <- R6Class("annotator",
       # S4 classes are in practice.
       self$annotate_type(class(x), class_system(x))
     },
-    annotate_type = function(classes, system=NULL) {
-      # Query DB for annotations matching any of the classes.
+    annotate_type = function(class, system=NULL) {
       db = private$db
-      sys = system %||% "S3"
-      matches = db$tbl() %>%
-        dplyr::filter(kind=="object", system==sys, class %in% classes) %>%
-        dplyr::collect()
-
-      # Return annotation for the most specific annotated class, if any.
-      for (cls in classes) {
-        match = matches %>% dplyr::filter(class==cls)
-        if (nrow(match) > 0) {
-          if (nrow(match) > 1) {
-            # When multiple annotations match the same class, return the first one.
-            warning("Multiple annotations match class: ", cls)
-          }
-          return(match[[1,"key"]])
-        }
-      }
+      match = db$tbl() %>%
+        dplyr::filter(kind == "object",
+                      system == !! (system %||% "S3"), class %in% !! class) %>%
+        dplyr::collect() %>%
+        private$filter_best_class(class, system) %>%
+        private$select_first()
     },
     load_packages = function(pkgs) {
       loaded = private$loaded
@@ -98,6 +92,24 @@ annotator <- R6Class("annotator",
   ),
   private = list(
     db = NULL,
-    loaded = NULL
+    loaded = NULL,
+    filter_best_class = function(df, class, system=NULL) {
+      # Return annotation for the most specific annotated class, if any.
+      for (cls in class) {
+        filtered = df %>%
+          dplyr::filter(system == !! (system %||% "S3"), class == !! cls)
+        if (nrow(filtered) > 0)
+          return(filtered)
+      }
+      df[FALSE,]
+    },
+    select_first = function(df) {
+      if (nrow(df) > 0) {
+        key = df[[1,"key"]]
+        if (nrow(df) > 1)
+          warning("Ambiguously selected annotation: ", key)
+        key
+      }
+    }
   )
 )

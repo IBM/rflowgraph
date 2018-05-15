@@ -16,9 +16,9 @@ context("annotator")
 
 db = annotation_db$new()
 db$load_json(file.path("data", "annotations.json"))
+annotator = annotator$new(db)
 
 test_that("annotate objects by class", {
-  annotator = annotator$new(db)
   annotate = function(x) annotator$annotate_object(x)
   
   # Builtin S3 classes.
@@ -31,13 +31,22 @@ test_that("annotate objects by class", {
   expect_equal(annotate(structure(0,class=c("my-lm","lm"))), "r/stats/lm")
 })
 
-test_that("annotation calls by function name and package", {
-  annotator = annotator$new(db)
-  annotate = function(x) annotator$annotate_call(substitute(x))
+test_that("annotate functions", {
+  annotate = function(x, env=rlang::caller_env()) {
+    info = inspect_call(substitute(x), env)
+    annotator$annotate_function(info$name, info$package)
+  }
   
   # Named call.
   expect_equal(annotate(lm(y~x-1, df)), "r/stats/fit-lm")
   
   # Namespaced call.
   expect_equal(annotate(stats::lm(y~x-1, df)), "r/stats/fit-lm")
+})
+
+test_that("annotate methods", {
+  annotate = annotator$annotate_function
+  
+  expect_equal(annotate("predict", "stats"), "r/stats/predict")
+  expect_equal(annotate("predict", "stats", class="lm"), "r/stats/predict-lm")
 })

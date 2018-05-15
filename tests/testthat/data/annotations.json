@@ -134,5 +134,24 @@
     "id": "fit-lm",
     "kind": "morphism",
     "function": "lm"
+  },
+  {
+    "_id": "annotation/r/stats/predict",
+    "schema": "annotation",
+    "language": "r",
+    "package": "stats",
+    "id": "predict",
+    "kind": "morphism",
+    "function": "predict"
+  },
+  {
+    "_id": "annotation/r/stats/predict-lm",
+    "schema": "annotation",
+    "language": "r",
+    "package": "stats",
+    "id": "predict-lm",
+    "kind": "morphism",
+    "function": "predict",
+    "class": "lm"
   }
 ]

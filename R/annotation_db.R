@@ -46,7 +46,7 @@ annotation_db <- R6Class("annotation_db",
         # Index for object annotations.
         c("kind", "system", "class"),
         # Index for morphism annotations.
-        c("kind", "package", "function", "system", "class")
+        c("kind", "package", "function")
       ))
       private$notes = dict()
     },
