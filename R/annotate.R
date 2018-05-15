@@ -81,11 +81,18 @@ annotate_node <- function(annotator, g, node) {
 
 annotate_function <- function(annotator, g, node) {
   data = node_data(g, node)
+  in_ports = input_ports(g, node)
+  out_ports = output_ports(g, node)
+  
+  # Special case: Dispatch slot annotation.
   if (!is.null(data$slot))
     return(annotate_slot(annotator, g, node))
   
   # Look up annotation for function.
-  key = annotator$annotate_function(data$`function`, data$package)
+  first_data = if (is_empty(in_ports)) NULL else
+    input_port_data(g, node, in_ports[[1]])
+  key = annotator$annotate_function(data$`function`, data$package,
+                                    first_data$class, first_data$system)
   if (is.null(key)) return()
   
   # Attach annotation to node.
@@ -93,16 +100,17 @@ annotate_function <- function(annotator, g, node) {
   
   # Align input and outport ports to domain and codomain of annotation.
   note = annotator$annotation(key)
-  align_ports(input_ports(g, node), note$domain) %>%
+  align_ports(in_ports, note$domain) %>%
     iwalk(function(port, i) {
       if (is.na(port)) return()
       input_port_attr(g, node, port, "annotation_index") <- i
     })
-  align_ports(output_ports(g, node), note$codomain) %>%
+  align_ports(out_ports, note$codomain) %>%
     iwalk(function(port, i) {
       if (is.na(port)) return()
       key = note$codomain[[i]]$annotate
       if (!is.null(key)) {
+        # Override default output port annotation.
         output_port_attr(g, node, port, "annotation") <- key
         for (succ in successors(g, node)) {
           for (edge in edges(g, node, succ, port))

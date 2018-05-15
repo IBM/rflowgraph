@@ -36,25 +36,24 @@ annotator <- R6Class("annotator",
     annotation = function(...) private$db$annotation(...),
     annotate_function = function(name, package, class=NULL, system=NULL) {
       # Query DB for any annotations matching package and function.
-      db = private$db
-      match = db$tbl() %>%
+      match = private$db$tbl() %>%
         dplyr::filter(kind == "morphism",
                       package == !! package, `function` == name) %>%
         dplyr::collect()
       
       # First, try to match a method.
       class_na = is.na(match$class)
-      if (!(all(class_na) || is.null(class))) {
-        key = match[!class_na,] %>%
+      key = if (!(all(class_na) || is.null(class))) {
+        match[!class_na,] %>%
           private$filter_best_class(class, system) %>%
           private$select_first()
-        if (!is.null(key))
-          return(key)
       }
       
       # If that fails, try to match an ordinary function.
-      match[class_na,] %>%
-        private$select_first()
+      key %||% (
+        match[class_na,] %>%
+          private$select_first()
+      )
     },
     annotate_object = function(x) {
       # Ideally, we would filter by package but it's generally not possible
@@ -72,8 +71,7 @@ annotator <- R6Class("annotator",
       self$annotate_type(class(x), class_system(x))
     },
     annotate_type = function(class, system=NULL) {
-      db = private$db
-      match = db$tbl() %>%
+      private$db$tbl() %>%
         dplyr::filter(kind == "object",
                       system == !! (system %||% "S3"), class %in% !! class) %>%
         dplyr::collect() %>%
