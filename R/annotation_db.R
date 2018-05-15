@@ -65,16 +65,26 @@ annotation_db <- R6Class("annotation_db",
       dplyr::tbl(private$conn, "annotations")
     },
     load_documents = function(docs) {
-      # Store documents and create data frame for lookup.
+      df = self$prepare_table(docs)
       notes = private$notes
+      walk2(docs, df$key, function(doc, key) {
+        if (has_key(notes, key))
+          stop("Annotation already loaded: ", key)
+        notes[[key]] = doc
+      })
+      DBI::dbWriteTable(private$conn, "annotations", df, append=TRUE)
+    },
+    load_json = function(txt) {
+      docs = jsonlite::fromJSON(txt, simplifyDataFrame=FALSE)
+      self$load_documents(docs)
+    },
+    prepare_table = function(docs) {
+      # Create data frame for annotation lookup.
       required = set_names(c("package", "id", "kind"))
       optional = set_names(c("system", "class", "function"))
       df = map_dfr(docs, function(doc) {
         stopifnot(doc$schema == "annotation" && doc$language == "r")
         key = paste(doc$language, doc$package, doc$id, sep="/")
-        if (has_key(notes, key))
-          stop("Annotation already loaded: ", key)
-        notes[[key]] = doc
         c(list(key=key),
           map(required, ~ get_default(doc,.,stop("Bad annotation: ", key))),
           map(optional, ~ get_default(doc,.,NA_character_)))
@@ -89,12 +99,7 @@ annotation_db <- R6Class("annotation_db",
       is_namespaced = map_lgl(split_fun, ~ length(.) == 2)
       df[is_namespaced,"package"] = map_chr(split_fun[is_namespaced], ~.[[1]])
       df[is_namespaced,"function"] = map_chr(split_fun[is_namespaced], ~.[[2]])
-      
-      DBI::dbWriteTable(private$conn, "annotations", df, append=TRUE)
-    },
-    load_json = function(txt) {
-      docs = jsonlite::fromJSON(txt, simplifyDataFrame=FALSE)
-      self$load_documents(docs)
+      df
     }
   ),
   private = list(
