@@ -38,15 +38,15 @@ annotator <- R6Class("annotator",
       info = inspect_call(call, env)
       self$annotate_function(info$name, info$package)
     },
-    annotate_function = function(name, package) {
+    annotate_function = function(name, pkg) {
       # Query DB for annotations matching package and function name.
       db = private$db
       match = db$tbl() %>%
-        dplyr::filter(kind=="morphism", package==package, `function`==name) %>%
+        dplyr::filter(kind=="morphism", package==pkg, `function`==name) %>%
         dplyr::collect()
       if (nrow(match) > 0) {
         if (nrow(match) > 1) {
-          warning("Multiple annotations match function: ", package, "::", name)
+          warning("Multiple annotations match function: ", pkg, "::", name)
         }
         match[[1,"key"]]
       }
@@ -66,11 +66,12 @@ annotator <- R6Class("annotator",
       # S4 classes are in practice.
       self$annotate_type(class(x), class_system(x))
     },
-    annotate_type = function(classes, system="S3") {
+    annotate_type = function(classes, system=NULL) {
       # Query DB for annotations matching any of the classes.
       db = private$db
+      sys = system %||% "S3"
       matches = db$tbl() %>%
-        dplyr::filter(kind=="object", system==system, class %in% classes) %>%
+        dplyr::filter(kind=="object", system==sys, class %in% classes) %>%
         dplyr::collect()
 
       # Return annotation for the most specific annotated class, if any.

@@ -66,19 +66,19 @@ annotation_db <- R6Class("annotation_db",
     },
     load_documents = function(docs) {
       notes = private$notes
-      required = c("package", "id", "kind")
-      optional = c("system", "class", "function")
+      required = set_names(c("package", "id", "kind"))
+      optional = set_names(c("system", "class", "function"))
       df = map_dfr(docs, function(doc) {
         stopifnot(doc$schema == "annotation" && doc$language == "r")
         key = paste(doc$language, doc$package, doc$id, sep="/")
         if (has_key(notes, key))
           stop("Annotation already loaded: ", key)
         notes[[key]] = doc
-        
         c(list(key=key),
-          set_names(map(required, ~ get_default(doc,.,stop("bad note"))), required),
-          set_names(map(optional, ~ get_default(doc,.,NA_character_)), optional))
+          map(required, ~ get_default(doc,.,stop("Bad annotation: ", key))),
+          map(optional, ~ get_default(doc,.,NA_character_)))
       })
+      df[!is.na(df$class) & is.na(df$system), "system"] = "S3"
       DBI::dbWriteTable(private$conn, "annotations", df, append=TRUE)
     },
     load_json = function(txt) {
