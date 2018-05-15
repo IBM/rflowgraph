@@ -65,6 +65,7 @@ annotation_db <- R6Class("annotation_db",
       dplyr::tbl(private$conn, "annotations")
     },
     load_documents = function(docs) {
+      # Store documents and create data frame for lookup.
       notes = private$notes
       required = set_names(c("package", "id", "kind"))
       optional = set_names(c("system", "class", "function"))
@@ -78,7 +79,17 @@ annotation_db <- R6Class("annotation_db",
           map(required, ~ get_default(doc,.,stop("Bad annotation: ", key))),
           map(optional, ~ get_default(doc,.,NA_character_)))
       })
+      
+      # Schema: Default class system is S3.
       df[!is.na(df$class) & is.na(df$system), "system"] = "S3"
+      
+      # Schema: Function names may be namespaced (e.g., "stats::predict"),
+      # overriding the annotation's declared package. Useful for generics.
+      split_fun = strsplit(df$`function`, "::", fixed=TRUE)
+      is_namespaced = map_lgl(split_fun, ~ length(.) == 2)
+      df[is_namespaced,"package"] = map_chr(split_fun[is_namespaced], ~.[[1]])
+      df[is_namespaced,"function"] = map_chr(split_fun[is_namespaced], ~.[[2]])
+      
       DBI::dbWriteTable(private$conn, "annotations", df, append=TRUE)
     },
     load_json = function(txt) {
