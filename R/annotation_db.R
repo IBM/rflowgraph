@@ -27,6 +27,7 @@
 #' @name annotation_db
 NULL
 
+#' @importFrom dbplyr sql
 #' @export
 annotation_db <- R6Class("annotation_db",
   public = list(
