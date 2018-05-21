@@ -269,7 +269,7 @@ write_graphml_data <- function(graphml_keys, xelem, data) {
     # Get or create GraphML key for the data attribute.
     graphml_key = set_default(graphml_keys, paste(attr_name, scope, sep=":"), {
       id = paste0("d", length(graphml_keys) + 1)
-      attr_type = write_graphml_data_type(typeof(attr_value))
+      attr_type = write_graphml_data_type(class(attr_value))
       list(id=id, `for`=scope, attr.name=attr_name, attr.type=attr_type)
     })
     
@@ -279,22 +279,26 @@ write_graphml_data <- function(graphml_keys, xelem, data) {
   }
 }
 
-write_graphml_data_type <- function(type) {
-  if (type == "logical") "boolean"
-  else if (type == "integer") "int"
-  else if (type == "double") "double"
-  else if (type == "character") "string"
-  else stop("No GraphML data type for R type: ", type)
+write_graphml_data_type <- function(cls) {
+  switch(cls[1],
+    logical="boolean",
+    integer="int",
+    numeric="double",
+    character="string",
+    formula="string",
+    stop("No GraphML data type for R class: ", cls)
+  )
 }
 
 write_graphml_data_value <- function(x) {
-  type = typeof(x)
-  if (type == "logical")
-    tolower(toString(x))
-  else if (type == "integer" || type == "double" || type == "character")
-    toString(x)
-  else
-    stop("No GraphML data type for R type: ", type)
+  switch(class(x)[1],
+    logical=tolower(toString(x)),
+    integer=toString(x),
+    numeric=toString(x),
+    character=x,
+    formula=format(x),
+    stop("No GraphML data type for R class: ", cls)
+  )
 }
 
 xml_required_attr <- function(x, attr) {
