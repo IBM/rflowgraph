@@ -156,6 +156,6 @@ test_that("record and store object values", {
   add_node(g, "+:1", list(e1=list(value=1), e2=list(value=1)), out_value(2))
   add_edge(g, "numeric:1", "+:1", ret, "e1")
   add_edge(g, "numeric:2", "+:1", ret, "e2")
-  h = record(1+1, values=TRUE)
+  h = record(1+1, port_values=TRUE)
   expect_equal(h, g)
 })

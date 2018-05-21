@@ -9,7 +9,7 @@ record(x, env = rlang::caller_env(), ...)
 
 record_expr(x, env = rlang::caller_env(), cwd = NULL, annotate = FALSE,
   db = NULL, data = annotate, node_data = data, port_data = data,
-  values = data)
+  port_values = FALSE)
 }
 \arguments{
 \item{x}{(unevaluated) expression}
@@ -24,14 +24,13 @@ working directory)}
 \item{db}{annotation database, if annotation is enabled
 (by default, the Data Science Ontology)}
 
-\item{data}{convenience switch for data storage 
-(node data, port data, values)}
+\item{data}{convenience switch to store metadata (on nodes and ports)}
 
 \item{node_data}{whether to store function metadata as node data}
 
 \item{port_data}{whether to store object metadata as port data}
 
-\item{values}{whether to store object values as port data}
+\item{port_values}{whether to store object values as port data}
 }
 \value{
 A flow graph, of class \code{wiring_diagram}, for the evaluation.

@@ -23,11 +23,10 @@
 #' @param annotate whether to annotate the flow graph
 #' @param db annotation database, if annotation is enabled
 #'   (by default, the Data Science Ontology)
-#' @param data convenience switch for data storage 
-#'   (node data, port data, values)
+#' @param data convenience switch to store metadata (on nodes and ports)
 #' @param node_data whether to store function metadata as node data
 #' @param port_data whether to store object metadata as port data
-#' @param values whether to store object values as port data
+#' @param port_values whether to store object values as port data
 #' 
 #' @return A flow graph, of class \code{wiring_diagram}, for the evaluation.
 #' 
@@ -41,7 +40,7 @@ record <- function(x, env=rlang::caller_env(), ...) {
 #' @export
 record_expr <- function(x, env=rlang::caller_env(), cwd=NULL,
                         annotate=FALSE, db=NULL, data=annotate,
-                        node_data=data, port_data=data, values=data) {
+                        node_data=data, port_data=data, port_values=FALSE) {
   # Validate arguments and prepare recording state.
   exprs = if (is.expression(x)) as.list(x) else rlang::parse_exprs(x)
   expr = if (length(exprs) == 1)
@@ -50,7 +49,7 @@ record_expr <- function(x, env=rlang::caller_env(), cwd=NULL,
     as.call(c(list(quote(`{`)), exprs))
   
   state = record_state$new(list(
-    env=env, node_data=node_data, port_data=port_data, values=values))
+    env=env, node_data=node_data, port_data=port_data, port_values=port_values))
   
   # Evaluate and record, including environment setup and tear down.
   oldwd = NULL
@@ -254,8 +253,8 @@ make_port_data <- function(state, value) {
   # FIXME: There should options to control which values get stored.
   # Only atomic vectors? Only values that are not too big (by memory size)?
   opts = state$options
-  c(if (opts$values) list(value=value) else list(),
-    if (opts$port_data) inspect_obj(value) else list())
+  c(if (opts$port_data) inspect_obj(value) else list(),
+    if (opts$port_values) list(value=value) else list())
 }
 
 # Data structures
