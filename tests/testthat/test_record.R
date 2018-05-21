@@ -83,7 +83,7 @@ test_that("record calls with ellipses", {
 
 test_that("record access of object part by name", {
   g = wiring_diagram()
-  add_node(g, "character:1", list(), ret, list(kind="literal"))
+  add_node(g, "character:1", list(), ret, list(kind="literal", value="foo"))
   add_node(g, "$:1", c("1","2"), ret, list(
     `function`="$", package="base", slot="foo"))
   add_edge(g, "character:1", "$:1", ret, "2")
@@ -95,7 +95,7 @@ test_that("record access of object part by name", {
 
 test_that("record access of S4 slot", {
   g = wiring_diagram()
-  add_node(g, "character:1", list(), ret, list(kind="literal"))
+  add_node(g, "character:1", list(), ret, list(kind="literal", value="name"))
   add_node(g, "@:1", c("1","2"), ret, list(
     `function`="@", package="base", slot="name"))
   add_edge(g, "character:1", "@:1", ret, "2")
@@ -124,8 +124,8 @@ test_that("record definition and call of user function", {
 
 test_that("record and store node data", {
   g = wiring_diagram()
-  add_node(g, "numeric:1", list(), ret, list(kind="literal"))
-  add_node(g, "numeric:2", list(), ret, list(kind="literal"))
+  add_node(g, "numeric:1", list(), ret, list(kind="literal", value=1))
+  add_node(g, "numeric:2", list(), ret, list(kind="literal", value=1))
   add_node(g, "+:1", c("e1","e2"), ret, list(`function`="+", package="base"))
   add_edge(g, "numeric:1", "+:1", ret, "e1")
   add_edge(g, "numeric:2", "+:1", ret, "e2")

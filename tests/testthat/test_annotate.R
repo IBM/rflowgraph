@@ -21,11 +21,10 @@ num = list(class="numeric", system="S3", annotation="r/base/numeric")
 int = list(class="integer", system="S3", annotation="r/base/integer")
 chr = list(class="character", system="S3")
 
-literal = function(key) {
-  if (missing(key))
-    list(kind="literal")
-  else
-    list(kind="literal", annotation=key, annotation_kind="construct")
+literal = function(value, key) {
+  c(list(kind="literal", value=value),
+    if (missing(key)) list()
+    else list(annotation=key, annotation_kind="construct"))
 }
 
 port = function(data=list(), i)
@@ -35,8 +34,8 @@ out_port = function(...) set_names(list(port(...)), return_port)
 
 test_that("annotate nodes of flow graph", {
   g = wiring_diagram()
-  add_node(g, "numeric:1", list(), out_port(), literal())
-  add_node(g, "numeric:2", list(), out_port(), literal())
+  add_node(g, "numeric:1", list(), out_port(), literal(1))
+  add_node(g, "numeric:2", list(), out_port(), literal(1))
   add_node(g, "+:1", list(e1=port(i=1), e2=port(i=2)), out_port(i=1),
            list(`function`="+", package="base", annotation="r/base/plus"))
   add_edge(g, "numeric:1", "+:1", return_port, "e1")
@@ -62,8 +61,8 @@ test_that("annotate ports of flow graph", {
 
 test_that("annotate nodes and ports of flow graph", {
   g = wiring_diagram()
-  add_node(g, "integer:1", list(), out_port(int,1), literal("r/base/integer"))
-  add_node(g, "integer:2", list(), out_port(int,1), literal("r/base/integer"))
+  add_node(g, "integer:1", list(), out_port(int,1), literal(1L,"r/base/integer"))
+  add_node(g, "integer:2", list(), out_port(int,1), literal(2L,"r/base/integer"))
   add_node(g, "*:1", list(e1=port(int,1), e2=port(int,2)), out_port(int,1),
            list(`function`="*", package="base", annotation="r/base/times"))
   add_edge(g, "integer:1", "*:1", return_port, "e1")
@@ -76,7 +75,7 @@ test_that("annotate nodes and ports of flow graph", {
 test_that("annotate slot access in flow graph", {
   htest = list(class="htest", system="S3", annotation="r/stats/htest")
   g = wiring_diagram()
-  add_node(g, "character:1", list(), out_port(chr), literal())
+  add_node(g, "character:1", list(), out_port(chr), literal("p.value"))
   add_node(g, "$:1", list(`1`=htest, `2`=chr), out_port(num),
            list(`function`="$", package="base", slot="p.value",
                 annotation="r/stats/htest", annotation_kind="slot", annotation_index=1L))
@@ -91,7 +90,7 @@ test_that("override output port annotation from function annotation", {
   summary_obj = list(class=c("summaryDefault", "table"), system="S3", 
                      annotation="r/base/summary-object")
   g = wiring_diagram()
-  add_node(g, "numeric:1", list(), out_port(num,1), literal("r/base/numeric"))
+  add_node(g, "numeric:1", list(), out_port(num,1), literal(0,"r/base/numeric"))
   add_node(g, "summary:1", list(object=port(num,1)), out_port(summary_obj,1),
            list(`function`="summary", package="base", system="S3", 
                 annotation="r/base/summary"))

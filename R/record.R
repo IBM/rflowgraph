@@ -106,7 +106,10 @@ record_expr_ <- function(expr, state, index=NULL) {
 record_literal <- function(value, state, index=NULL) {
   # Create nullary node for literal.
   out_ports = list(make_port_data(state, value)) %>% set_names(return_port)
-  data = if (state$options$node_data) list(kind="literal") else list()
+  data = if (state$options$node_data)
+    list(kind="literal", value=value)
+  else
+    list()
   node = add_node(state, class(value), list(), out_ports, data)
   
   # Attach value to node.
