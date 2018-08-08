@@ -129,48 +129,32 @@ NULL
 remote_annotation_db <- R6Class("remote_annotation_db",
   inherit = annotation_db,
   public = list(
-    initialize = function(config=NULL) {
-      if (is.null(config)) config = default_remote_annotation_db_config
-      i = match("dbname", names2(config))
-      stopifnot(!is.na(i))
-      private$cushion = invoke(sofa::Cushion$new, config[-i])
-      private$dbname = config[[i]]
+    initialize = function(api_url=NULL) {
+      if (is.null(api_url))
+        api_url = "https://api.datascienceontology.org"
+      private$api_client = crul::HttpClient$new(url=api_url)
       super$initialize()
     },
     list_packages = function() {
-      # Row keys are triples (schema, language, package).
-      result = sofa::design_search(private$cushion, private$dbname, "query",
-                                   "annotation_index", list(group=TRUE))
-      result$rows %>%
-        keep(function(row) row$key[[2]] == "r") %>%
-        map_chr(function(row) row$key[[3]])
+      counts = private$api_get("/count/annotation/r")
+      names(counts)
     },
     load_all_packages = function() {
-      result = sofa::db_query(private$cushion, private$dbname, selector=list(
-        schema = "annotation",
-        language = "r"
-      ))
-      self$load_documents(result$docs)
+      docs = private$api_get("/annotations/r")
+      self$load_documents(docs)
     },
     load_packages = function(pkgs) {
-      pkgs = as.list(pkgs)
-      result = sofa::db_query(private$cushion, private$dbname, selector=list(
-        schema = "annotation",
-        language = "r",
-        package = if (length(pkgs) == 1) pkgs[[1]] else list(`$in` = pkgs)
-      ))
-      self$load_documents(result$docs)
+      for (pkg in pkgs) {
+        docs = private$api_get(paste0("/annotations/r/", pkg))
+        self$load_documents(docs)
+      }
     }
   ),
   private = list(
-    cushion = NULL,
-    dbname = character()
+    api_client = NULL,
+    api_get = function(endpoint) {
+      response = private$api_client$get(endpoint)
+      jsonlite::fromJSON(response$parse(), simplifyVector=FALSE)
+    }
   )
-)
-
-default_remote_annotation_db_config <- list(
-  host = "d393c3b5-9979-4183-98f4-7537a5de15f5-bluemix.cloudant.com",
-  port = NULL,
-  transport = "https",
-  dbname = "data-science-ontology"
 )

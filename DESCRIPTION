@@ -10,6 +10,7 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
 Imports:
+  crul,
   dequer,
   dplyr,
   dbplyr,
@@ -18,7 +19,6 @@ Imports:
   R6,
   rlang (>= 0.2.0),
   RSQLite,
-  sofa,
   zeallot
 Suggests:
   testthat (>= 2.0.0)
