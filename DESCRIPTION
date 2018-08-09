@@ -1,4 +1,4 @@
-Package: opendisc
+Package: flowgraph
 Type: Package
 Title: Flow Graphs
 Version: 0.1.0

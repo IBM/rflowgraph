@@ -13,6 +13,6 @@
 # limitations under the License.
 
 library(testthat)
-library(opendisc)
+library(flowgraph)
 
-test_check("opendisc")
+test_check("flowgraph")
