@@ -1,0 +1,6 @@
+# R for Travis: https://docs.travis-ci.com/user/languages/r
+
+language: R
+cache: packages
+sudo: false
+latex: false
