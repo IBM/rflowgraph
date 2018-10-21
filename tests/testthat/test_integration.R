@@ -33,9 +33,9 @@ out_port = function(...) set_names(list(port(...)), return_port)
 
 
 test_that("record k-means clustering on Iris data", {
-  h = record_expr(file(file.path("data", "clustering_kmeans.R")),
+  h = record_file(file.path("data", "clustering_kmeans.R"),
+                  out=file.path("data", "clustering_kmeans.xml"),
                   cwd="data", annotate=TRUE)
-  write_graphml(h, file.path("data", "clustering_kmeans.xml"))
   expect_equal(names(iris), c("SepalLength","SepalWidth","PetalLength","PetalWidth"))
   expect_is(centroids, "matrix")
   expect_is(clusters, "integer")

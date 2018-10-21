@@ -18,6 +18,7 @@
 #' 
 #' @param x (unevaluated) expression
 #' @param env evaluation environment
+#' @param out file path or connection in which to write flow graph as GraphML
 #' @param cwd working directory during evaluation (by default, the current
 #'   working directory)
 #' @param annotate whether to annotate the flow graph
@@ -38,7 +39,15 @@ record <- function(x, env=rlang::caller_env(), ...) {
 
 #' @rdname record
 #' @export
-record_expr <- function(x, env=rlang::caller_env(), cwd=NULL,
+record_file <- function(x, env=rlang::caller_env(), ...) {
+  if (!inherits(x, "connection"))
+    x = file(x)
+  record_expr(x, env=env, ...)
+}
+
+#' @rdname record
+#' @export
+record_expr <- function(x, env=rlang::caller_env(), out=NULL, cwd=NULL,
                         annotate=FALSE, db=NULL, data=annotate,
                         node_data=data, port_data=data, port_values=FALSE) {
   # Validate arguments and prepare recording state.
@@ -68,9 +77,16 @@ record_expr <- function(x, env=rlang::caller_env(), cwd=NULL,
       setwd(oldwd)
   })
   
-  # Return flow graph, possibly after annotation.
+  # Annotate flow graph.
   graph = state$graph()
-  if (annotate) annotate(graph, db=db) else graph
+  if (annotate)
+    graph = annotate(graph, db=db)
+
+  # Write flow graph as GraphML.
+  if (!is.null(out))
+    write_graphml(graph, out)
+  
+  graph
 }
 
 transform_ast <- function(expr, index=NULL) {

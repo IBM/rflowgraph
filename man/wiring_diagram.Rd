@@ -16,7 +16,8 @@
 \alias{target_port}
 \title{Wiring diagrams}
 \usage{
-wiring_diagram(input_ports = list(), output_ports = list(), data = list())
+wiring_diagram(input_ports = list(), output_ports = list(),
+  data = list())
 
 input_node(g)
 

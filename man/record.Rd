@@ -2,19 +2,24 @@
 % Please edit documentation in R/record.R
 \name{record}
 \alias{record}
+\alias{record_file}
 \alias{record_expr}
 \title{Record as flow graph}
 \usage{
 record(x, env = rlang::caller_env(), ...)
 
-record_expr(x, env = rlang::caller_env(), cwd = NULL, annotate = FALSE,
-  db = NULL, data = annotate, node_data = data, port_data = data,
-  port_values = FALSE)
+record_file(x, env = rlang::caller_env(), ...)
+
+record_expr(x, env = rlang::caller_env(), out = NULL, cwd = NULL,
+  annotate = FALSE, db = NULL, data = annotate, node_data = data,
+  port_data = data, port_values = FALSE)
 }
 \arguments{
 \item{x}{(unevaluated) expression}
 
 \item{env}{evaluation environment}
+
+\item{out}{file path or connection in which to write flow graph as GraphML}
 
 \item{cwd}{working directory during evaluation (by default, the current
 working directory)}
