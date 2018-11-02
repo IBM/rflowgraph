@@ -5,7 +5,7 @@
     "language": "r",
     "package": "base",
     "id": "integer",
-    "kind": "object",
+    "kind": "type",
     "class": "integer",
     "definition": "number"
   },
@@ -15,7 +15,7 @@
     "language": "r",
     "package": "base",
     "id": "numeric",
-    "kind": "object",
+    "kind": "type",
     "class": "numeric",
     "definition": "number"
   },
@@ -25,10 +25,10 @@
     "language": "r",
     "package": "base",
     "id": "plus",
-    "kind": "morphism",
+    "kind": "function",
     "function": "+",
     "definition": "plus",
-    "domain": [
+    "inputs": [
       {
         "slot": "e1"
       },
@@ -36,7 +36,7 @@
         "slot": "e2"
       }
     ],
-    "codomain": [
+    "outputs": [
       {
         "slot": "__return__"
       }
@@ -48,10 +48,10 @@
     "language": "r",
     "package": "base",
     "id": "times",
-    "kind": "morphism",
+    "kind": "function",
     "function": "*",
     "definition": "times",
-    "domain": [
+    "inputs": [
       {
         "slot": 1
       },
@@ -59,7 +59,7 @@
         "slot": 2
       }
     ],
-    "codomain": [
+    "outputs": [
       {
         "slot": 1
       }
@@ -71,15 +71,15 @@
     "language": "r",
     "package": "base",
     "id": "summary",
-    "kind": "morphism",
+    "kind": "function",
     "function": "summary",
     "definition": "summarize",
-    "domain": [
+    "inputs": [
       {
         "slot": "object"
       }
     ],
-    "codomain": [
+    "outputs": [
       {
         "slot": "__return__",
         "annotate": "r/base/summary-object"
@@ -92,7 +92,7 @@
     "language": "r",
     "package": "stats",
     "id": "htest",
-    "kind": "object",
+    "kind": "type",
     "class": "htest",
     "definition": "hypothesis-test",
     "slots": [
@@ -112,7 +112,7 @@
     "language": "r",
     "package": "stats",
     "id": "lm",
-    "kind": "object",
+    "kind": "type",
     "class": "lm",
     "definition": "linear-model"
   },
@@ -122,7 +122,7 @@
     "language": "r",
     "package": "stats",
     "id": "glm",
-    "kind": "object",
+    "kind": "type",
     "class": "glm",
     "definition": "generalized-linear-model"
   },
@@ -132,7 +132,7 @@
     "language": "r",
     "package": "stats",
     "id": "fit-lm",
-    "kind": "morphism",
+    "kind": "function",
     "function": "lm"
   },
   {
@@ -141,7 +141,7 @@
     "language": "r",
     "package": "stats",
     "id": "predict",
-    "kind": "morphism",
+    "kind": "function",
     "function": "predict"
   },
   {
@@ -150,7 +150,7 @@
     "language": "r",
     "package": "stats",
     "id": "predict-lm",
-    "kind": "morphism",
+    "kind": "function",
     "function": "predict",
     "class": "lm"
   }

@@ -98,17 +98,17 @@ annotate_function <- function(annotator, g, node) {
   # Attach annotation to node.
   node_attr(g, node, "annotation") <- key
   
-  # Align input and outport ports to domain and codomain of annotation.
+  # Align input and outport ports of function to those of annotation.
   note = annotator$annotation(key)
-  align_ports(in_ports, note$domain) %>%
+  align_ports(in_ports, note$inputs) %>%
     iwalk(function(port, i) {
       if (is.na(port)) return()
       input_port_attr(g, node, port, "annotation_index") <- i
     })
-  align_ports(out_ports, note$codomain) %>%
+  align_ports(out_ports, note$outputs) %>%
     iwalk(function(port, i) {
       if (is.na(port)) return()
-      key = note$codomain[[i]]$annotate
+      key = note$outputs[[i]]$annotate
       if (!is.null(key)) {
         # Override default output port annotation.
         output_port_attr(g, node, port, "annotation") <- key

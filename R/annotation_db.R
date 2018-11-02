@@ -44,9 +44,9 @@ annotation_db <- R6Class("annotation_db",
       )
       DBI::dbWriteTable(conn, "annotations", df)
       dplyr::db_create_indexes(conn, "annotations", list(
-        # Index for object annotations.
+        # Index for type annotations.
         c("kind", "system", "class"),
-        # Index for morphism annotations.
+        # Index for function annotations.
         c("kind", "package", "function")
       ))
       private$notes = dict()
