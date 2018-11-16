@@ -391,4 +391,4 @@ NO_RECORD_FUNS <- c(
   "base::requireNamespace"
 )
 
-return_port = "__return__"
+return_port = ".return"

@@ -14,7 +14,7 @@
 
 context("record")
 
-ret = "__return__"
+ret = ".return"
 
 test_that("record literal values", {
   g = wiring_diagram()

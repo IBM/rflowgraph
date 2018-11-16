@@ -38,7 +38,7 @@
     ],
     "outputs": [
       {
-        "slot": "__return__"
+        "slot": ".return"
       }
     ]
   },
@@ -81,7 +81,7 @@
     ],
     "outputs": [
       {
-        "slot": "__return__",
+        "slot": ".return",
         "annotate": "r/base/summary-object"
       }
     ]
