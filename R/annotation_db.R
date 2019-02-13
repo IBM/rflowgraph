@@ -83,13 +83,14 @@ annotation_db <- R6Class("annotation_db",
       # Create data frame for annotation lookup.
       required = set_names(c("package", "id", "kind"))
       optional = set_names(c("system", "class", "function"))
-      df = map_dfr(docs, function(doc) {
-        stopifnot(doc$schema == "annotation" && doc$language == "r")
-        key = paste(doc$language, doc$package, doc$id, sep="/")
-        c(list(key=key),
-          map(required, ~ get_default(doc,.,stop("Bad annotation: ", key))),
-          map(optional, ~ get_default(doc,.,NA_character_)))
-      })
+      df = docs %>%
+        keep(function(doc) doc$schema == "annotation" && doc$language == "r") %>%
+        map_dfr(function(doc) {
+          key = paste(doc$language, doc$package, doc$id, sep="/")
+          c(list(key=key),
+            map(required, ~ get_default(doc,.,stop("Bad annotation: ", key))),
+            map(optional, ~ get_default(doc,.,NA_character_)))
+        })
       
       # Schema: Default class system is S3.
       df[!is.na(df$class) & is.na(df$system), "system"] = "S3"
