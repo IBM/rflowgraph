@@ -24,10 +24,16 @@ NULL
 annotator <- R6Class("annotator",
   public = list(
     initialize = function(db=NULL) {
-      private$db = db = if (is.null(db)) remote_annotation_db$new() else db
+      if (is.null(db)) {
+        db = remote_annotation_db$new()
+      } else if (!inherits(db, "annotation_db")) {
+        text_or_conn = db
+        db = annotation_db$new()
+        db$load_json(text_or_conn)
+      }
+      private$db = db
       private$loaded = loaded = dict()
       
-      stopifnot(inherits(db, "annotation_db"))
       if (inherits(db, "remote_annotation_db")) {
         for (package in db$list_packages())
           loaded[[package]] = FALSE

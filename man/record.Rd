@@ -26,8 +26,8 @@ working directory)}
 
 \item{annotate}{whether to annotate the flow graph}
 
-\item{db}{annotation database, if annotation is enabled
-(by default, the Data Science Ontology)}
+\item{db}{annotation database or JSON source for annotations, if annotation
+is enabled (by default, the Data Science Ontology via remote database)}
 
 \item{data}{convenience switch to store metadata (on nodes and ports)}
 

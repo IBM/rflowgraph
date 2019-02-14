@@ -22,8 +22,8 @@
 #' @param cwd working directory during evaluation (by default, the current
 #'   working directory)
 #' @param annotate whether to annotate the flow graph
-#' @param db annotation database, if annotation is enabled
-#'   (by default, the Data Science Ontology)
+#' @param db annotation database or JSON source for annotations, if annotation
+#'   is enabled (by default, the Data Science Ontology via remote database)
 #' @param data convenience switch to store metadata (on nodes and ports)
 #' @param node_data whether to store function metadata as node data
 #' @param port_data whether to store object metadata as port data

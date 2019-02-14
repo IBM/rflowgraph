@@ -14,9 +14,7 @@
 
 context("annotator")
 
-db = annotation_db$new()
-db$load_json(file.path("data", "annotations.json"))
-annotator = annotator$new(db)
+annotator = annotator$new(file.path("data", "annotations.json"))
 
 test_that("annotate objects by class", {
   annotate = function(x) annotator$annotate_object(x)
