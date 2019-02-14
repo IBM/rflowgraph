@@ -17,7 +17,8 @@
 #' @description Annotate a flow graph, as created by \code{record}.
 #' 
 #' @param g flow graph to annotate
-#' @param db annotation database (by default, the Data Science Ontology)
+#' @param annotations annotation database or JSON source for annotations
+#'   (by default, the Data Science Ontology via remote database)
 #' @param nodes whether to annotate nodes
 #' @param ports whether to annotate ports
 #' 
@@ -30,7 +31,7 @@
 #' 
 #' @seealso \code{\link{record}}
 #' @export
-annotate <- function(g, db=NULL, nodes=TRUE, ports=TRUE) {
+annotate <- function(g, annotations=NULL, nodes=TRUE, ports=TRUE) {
   # Load package annotations, if not already loaded.
   #
   # Note: Packages cannot be assigned to classes due to R's informal class
@@ -39,7 +40,7 @@ annotate <- function(g, db=NULL, nodes=TRUE, ports=TRUE) {
   # is selected is undefined.
   packages = nodes(g) %>% map(function(node) node_attr(g, node, "package")) %>%
     compact() %>% unique()
-  annotator = annotator$new(db)
+  annotator = annotator$new(annotations)
   annotator$load_packages(packages)
   
   # Annotate input and output ports.

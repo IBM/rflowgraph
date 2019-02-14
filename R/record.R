@@ -22,8 +22,9 @@
 #' @param cwd working directory during evaluation (by default, the current
 #'   working directory)
 #' @param annotate whether to annotate the flow graph
-#' @param db annotation database or JSON source for annotations, if annotation
-#'   is enabled (by default, the Data Science Ontology via remote database)
+#' @param annotations annotation database or JSON source for annotations, if
+#'   `annotate` is enabled (by default, the Data Science Ontology via remote
+#'   database)
 #' @param data convenience switch to store metadata (on nodes and ports)
 #' @param node_data whether to store function metadata as node data
 #' @param port_data whether to store object metadata as port data
@@ -48,7 +49,7 @@ record_file <- function(x, env=rlang::caller_env(), ...) {
 #' @rdname record
 #' @export
 record_expr <- function(x, env=rlang::caller_env(), out=NULL, cwd=NULL,
-                        annotate=FALSE, db=NULL, data=annotate,
+                        annotate=FALSE, annotations=NULL, data=annotate,
                         node_data=data, port_data=data, port_values=FALSE) {
   # Validate arguments and prepare recording state.
   exprs = if (is.expression(x)) as.list(x) else rlang::parse_exprs(x)
@@ -80,7 +81,7 @@ record_expr <- function(x, env=rlang::caller_env(), out=NULL, cwd=NULL,
   # Annotate flow graph.
   graph = state$graph()
   if (annotate)
-    graph = annotate(graph, db=db)
+    graph = annotate(graph, annotations=annotations)
 
   # Write flow graph as GraphML.
   if (!is.null(out))

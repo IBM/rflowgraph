@@ -23,13 +23,14 @@ NULL
 #' @export
 annotator <- R6Class("annotator",
   public = list(
-    initialize = function(db=NULL) {
-      if (is.null(db)) {
+    initialize = function(annotations=NULL) {
+      if (inherits(annotations, "annotation_db")) {
+        db = annotations
+      } else if (is.null(annotations)) {
         db = remote_annotation_db$new()
-      } else if (!inherits(db, "annotation_db")) {
-        text_or_conn = db
+      } else {
         db = annotation_db$new()
-        db$load_json(text_or_conn)
+        db$load_json(annotations)
       }
       private$db = db
       private$loaded = loaded = dict()

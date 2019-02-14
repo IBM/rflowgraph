@@ -11,8 +11,8 @@ record(x, env = rlang::caller_env(), ...)
 record_file(x, env = rlang::caller_env(), ...)
 
 record_expr(x, env = rlang::caller_env(), out = NULL, cwd = NULL,
-  annotate = FALSE, db = NULL, data = annotate, node_data = data,
-  port_data = data, port_values = FALSE)
+  annotate = FALSE, annotations = NULL, data = annotate,
+  node_data = data, port_data = data, port_values = FALSE)
 }
 \arguments{
 \item{x}{(unevaluated) expression}
@@ -26,8 +26,9 @@ working directory)}
 
 \item{annotate}{whether to annotate the flow graph}
 
-\item{db}{annotation database or JSON source for annotations, if annotation
-is enabled (by default, the Data Science Ontology via remote database)}
+\item{annotations}{annotation database or JSON source for annotations, if
+`annotate` is enabled (by default, the Data Science Ontology via remote
+database)}
 
 \item{data}{convenience switch to store metadata (on nodes and ports)}
 

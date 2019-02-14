@@ -42,7 +42,7 @@ test_that("annotate nodes of flow graph", {
   add_edge(g, "numeric:2", "+:1", return_port, "e2")
   
   h = record(1+1, node_data=TRUE, port_data=FALSE) %>%
-    annotate(db=db, nodes=TRUE, ports=FALSE)
+    annotate(db, nodes=TRUE, ports=FALSE)
   expect_equal(h, g)
 })
 
@@ -55,7 +55,7 @@ test_that("annotate ports of flow graph", {
   add_edge(g, "numeric:2", "+:1", return_port, "e2")
   
   h = record(1+1, node_data=FALSE, port_data=TRUE) %>%
-    annotate(db=db, nodes=FALSE, ports=TRUE)
+    annotate(db, nodes=FALSE, ports=TRUE)
   expect_equal(h, g)
 })
 
@@ -68,7 +68,7 @@ test_that("annotate nodes and ports of flow graph", {
   add_edge(g, "integer:1", "*:1", return_port, "e1")
   add_edge(g, "integer:2", "*:1", return_port, "e2")
   
-  h = record(1L*2L, data=TRUE) %>% annotate(db=db)
+  h = record(1L*2L, data=TRUE) %>% annotate(db)
   expect_equal(h, g)
 })
 
@@ -82,7 +82,7 @@ test_that("annotate slot access in flow graph", {
   add_edge(g, "character:1", "$:1", return_port, "2")
   
   htest = binom.test(28, 50)
-  h = record(htest$p.value, data=TRUE) %>% annotate(db=db)
+  h = record(htest$p.value, data=TRUE) %>% annotate(db)
   expect_equal(h, g)
 })
 
@@ -104,7 +104,7 @@ test_that("override output port annotation from function annotation", {
 })
 
 test_that("annotate is idempotent", {
-  g = record(1+1, data=TRUE) %>% annotate(db=db)
-  h = record(1+1, data=TRUE) %>% annotate(db=db) %>% annotate(db=db)
+  g = record(1+1, data=TRUE) %>% annotate(db)
+  h = record(1+1, data=TRUE) %>% annotate(db) %>% annotate(db)
   expect_equal(h, g)
 })

@@ -4,12 +4,13 @@
 \alias{annotate}
 \title{Annotate a flow graph}
 \usage{
-annotate(g, db = NULL, nodes = TRUE, ports = TRUE)
+annotate(g, annotations = NULL, nodes = TRUE, ports = TRUE)
 }
 \arguments{
 \item{g}{flow graph to annotate}
 
-\item{db}{annotation database (by default, the Data Science Ontology)}
+\item{annotations}{annotation database or JSON source for annotations
+(by default, the Data Science Ontology via remote database)}
 
 \item{nodes}{whether to annotate nodes}
 
