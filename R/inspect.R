@@ -18,7 +18,7 @@
 call_fun <- function(call, env=rlang::caller_env()) {
   stopifnot(is.call(call))
   if (rlang::is_formula(call))
-    # XXX: rlang::lang_type_of(~.) chokes (see `call_type_of`).
+    # `rlang::call_fn(~.)` errors
     `~`
   else
     rlang::call_fn(call, env)
@@ -30,15 +30,16 @@ call_fun <- function(call, env=rlang::caller_env()) {
 #' of a function call.
 #' 
 #' @seealso \code{rlang::lang_type_of}
-call_type_of <- function(call) {
+call_type <- function(call) {
+  # Implementation was originally provided by exported function
+  # `rlang::lang_type_of`, now removed: https://github.com/r-lib/rlang/pull/790
+  # Implementation is now provided by a non-exported function, unfortunately.
   stopifnot(is.call(call))
   if (rlang::is_formula(call))
-    # XXX: rlang::lang_type_of can fail on formulas:
-    #   https://github.com/r-lib/rlang/issues/515
-    # Worse, the maintainers have no intention of fixing this bug.
+    # `rlang:::call_type(~.)` errors
     "named"
   else
-    rlang::lang_type_of(call)
+    rlang:::call_type(call)
 }
 
 #' Class system
@@ -196,7 +197,7 @@ inspect_call <- function(call, env=rlang::caller_env(), fun=NULL) {
     fun = call_fun(call, env)
   
   head = call[[1]]
-  switch(call_type_of(call), named = {
+  switch(call_type(call), named = {
     pkg = fun_package(fun)
     name = as.character(head)
   }, namespaced = {
