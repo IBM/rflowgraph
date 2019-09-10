@@ -17,7 +17,7 @@ Imports:
   jsonlite,
   purrr,
   R6,
-  rlang (>= 0.2.0),
+  rlang (>= 0.4.0),
   RSQLite,
   tibble,
   xml2,

@@ -33,7 +33,7 @@ annotation_db <- R6Class("annotation_db",
   public = list(
     initialize = function() {
       private$conn = conn = DBI::dbConnect(RSQLite::SQLite(), path=":memory:")
-      df = data_frame(
+      df = tibble(
         key = character(),
         package = character(),
         id = character(),
